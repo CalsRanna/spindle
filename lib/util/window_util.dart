@@ -1,0 +1,113 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:window_manager/window_manager.dart';
+
+enum WindowEvent { shown }
+
+class WindowUtil {
+  static final WindowUtil instance = WindowUtil._();
+
+  final _controller = StreamController<WindowEvent>();
+
+  WindowUtil._();
+
+  Map<Type, Action<Intent>> get actions => {
+        _HideWindowIntent: _HideWindowAction(),
+      };
+
+  Map<ShortcutActivator, Intent> get shortcuts => {
+        const SingleActivator(LogicalKeyboardKey.keyW, meta: true):
+            const _HideWindowIntent(),
+      };
+
+  Stream<WindowEvent> get stream => _controller.stream;
+
+  Future<void> destroy() async {
+    await windowManager.destroy();
+  }
+
+  Future<void> ensureInitialized({
+    double? width,
+    double? height,
+    String? title,
+  }) async {
+    await windowManager.ensureInitialized();
+
+    TitleBarStyle? titleStyle = TitleBarStyle.hidden;
+    if (Platform.isWindows) {
+      titleStyle = TitleBarStyle.normal;
+    }
+
+    final options = WindowOptions(
+      center: true,
+      minimumSize: const Size(400, 600),
+      size: Size(width ?? 1080, height ?? 720),
+      titleBarStyle: titleStyle,
+      windowButtonVisibility: false,
+      title: title ?? 'Spindle',
+    );
+
+    bool isPreventClose = true;
+    if (Platform.isWindows) {
+      isPreventClose = false;
+    }
+
+    windowManager.waitUntilReadyToShow(options, () async {
+      await windowManager.show();
+      await windowManager.focus();
+      await windowManager.setPreventClose(isPreventClose);
+    });
+  }
+
+  Future<void> hide() async {
+    await windowManager.setSkipTaskbar(true);
+    await windowManager.hide();
+  }
+
+  Future<bool> isMaximized() async {
+    return await windowManager.isMaximized();
+  }
+
+  Future<void> maximize() async {
+    await windowManager.maximize();
+  }
+
+  Future<void> minimize() async {
+    await windowManager.minimize();
+  }
+
+  Future<void> restore() async {
+    if (await windowManager.isMinimized()) {
+      await windowManager.restore();
+    }
+  }
+
+  Future<void> show() async {
+    await windowManager.setSkipTaskbar(false);
+    await windowManager.show();
+    await windowManager.focus();
+    _controller.add(WindowEvent.shown);
+  }
+
+  Future<void> startDragging() async {
+    await windowManager.startDragging();
+  }
+
+  Future<void> unmaximize() async {
+    await windowManager.unmaximize();
+  }
+}
+
+class _HideWindowAction extends Action<_HideWindowIntent> {
+  @override
+  Future<void> invoke(_HideWindowIntent intent) async {
+    await WindowUtil.instance.hide();
+  }
+}
+
+class _HideWindowIntent extends Intent {
+  const _HideWindowIntent();
+}
