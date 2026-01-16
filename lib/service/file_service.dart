@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:spindle/entity/song.dart';
 import 'package:spindle/repository/folder_repository.dart';
 import 'package:spindle/repository/song_repository.dart';
+import 'package:spindle/service/bookmark_service.dart';
 import 'package:spindle/service/metadata_service.dart';
 import 'package:spindle/entity/folder_path.dart';
 import 'package:spindle/util/logger_util.dart';
@@ -14,6 +15,7 @@ class FileService {
   final _songRepository = SongRepository();
   final _folderRepository = FolderRepository();
   final _metadataService = MetadataService();
+  final _bookmarkService = BookmarkService.instance;
   final _logger = LoggerUtil.instance;
 
   static const _supportedExtensions = [
@@ -33,6 +35,12 @@ class FileService {
   Future<String?> pickFolder() async {
     final result = await FilePicker.platform.getDirectoryPath();
     _logger.i('Picked folder: $result');
+
+    // Save bookmark for macOS sandbox persistence
+    if (result != null) {
+      await _bookmarkService.saveBookmark(result);
+    }
+
     return result;
   }
 

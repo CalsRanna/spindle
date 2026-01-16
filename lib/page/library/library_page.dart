@@ -59,6 +59,10 @@ class _LibraryPageState extends State<LibraryPage>
             icon: const Icon(Icons.add),
             onPressed: () => context.router.push(const ImportRoute()),
           ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => context.router.push(const SettingsRoute()),
+          ),
         ],
       ),
       body: isLoading

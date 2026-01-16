@@ -1,18 +1,26 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:signals/signals.dart';
 import 'package:spindle/database/database.dart';
 import 'package:spindle/di.dart';
 import 'package:spindle/router/app_router.dart';
 import 'package:spindle/service/audio_service.dart';
+import 'package:spindle/service/bookmark_service.dart';
 import 'package:spindle/util/app_theme.dart';
 import 'package:spindle/util/window_util.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SignalsObserver.instance = null;
 
   await Database.instance.ensureInitialized();
   await DI.ensureInitialized();
+
+  // Restore macOS security-scoped bookmarks for folder access
+  if (Platform.isMacOS) {
+    await BookmarkService.instance.restoreAllBookmarks();
+  }
 
   // Initialize audio session for background playback
   await AudioService.instance.init();
@@ -24,7 +32,6 @@ void main() async {
       height: 720,
     );
   }
-
   runApp(const MyApp());
 }
 
