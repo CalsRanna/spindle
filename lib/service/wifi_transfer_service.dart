@@ -83,27 +83,62 @@ class WiFiTransferService {
         includeLinkLocal: false,
       );
 
+      String? fallbackIp;
+
       for (final interface in interfaces) {
+        final name = interface.name.toLowerCase();
+
         // Skip loopback and virtual interfaces
-        if (interface.name.toLowerCase().contains('lo') ||
-            interface.name.toLowerCase().contains('vmnet') ||
-            interface.name.toLowerCase().contains('veth')) {
+        if (name.contains('lo') ||
+            name.contains('vmnet') ||
+            name.contains('veth') ||
+            name.contains('docker') ||
+            name.contains('bridge')) {
           continue;
         }
 
         for (final addr in interface.addresses) {
-          // Skip link-local addresses
-          if (!addr.address.startsWith('127.') &&
-              !addr.address.startsWith('169.254.')) {
-            _logger.i('Found IP: ${addr.address} on ${interface.name}');
+          // Skip loopback and link-local addresses
+          if (addr.address.startsWith('127.') ||
+              addr.address.startsWith('169.254.')) {
+            continue;
+          }
+
+          _logger.i('Found IP: ${addr.address} on ${interface.name}');
+
+          // Prefer WiFi interface (en0 on iOS/macOS, wlan on Android/Linux)
+          // and typical home network addresses (192.168.x.x, 172.16-31.x.x)
+          final isWifiInterface = name == 'en0' || name.contains('wlan');
+          final isHomeNetwork = addr.address.startsWith('192.168.') ||
+              _isPrivate172Address(addr.address);
+
+          if (isWifiInterface || isHomeNetwork) {
+            _logger.i('Selected WiFi IP: ${addr.address} on ${interface.name}');
             return addr.address;
           }
+
+          // Keep first valid IP as fallback
+          fallbackIp ??= addr.address;
         }
       }
+
+      if (fallbackIp != null) {
+        _logger.i('Using fallback IP: $fallbackIp');
+      }
+      return fallbackIp;
     } catch (e) {
       _logger.e('Error getting local IP: $e');
     }
     return null;
+  }
+
+  /// Check if address is in 172.16.0.0 - 172.31.255.255 range
+  bool _isPrivate172Address(String address) {
+    if (!address.startsWith('172.')) return false;
+    final parts = address.split('.');
+    if (parts.length < 2) return false;
+    final secondOctet = int.tryParse(parts[1]);
+    return secondOctet != null && secondOctet >= 16 && secondOctet <= 31;
   }
 
   /// Handle incoming HTTP requests
