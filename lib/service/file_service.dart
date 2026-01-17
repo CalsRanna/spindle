@@ -65,20 +65,23 @@ class FileService {
 
   /// Pick audio and lyrics files (works on iOS)
   Future<List<String>> pickFiles() async {
+    // Use FileType.any on iOS because custom extensions like .lrc
+    // may not be recognized by iOS's UTI system
     final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: _allowedExtensions,
+      type: Platform.isIOS ? FileType.any : FileType.custom,
+      allowedExtensions: Platform.isIOS ? null : _allowedExtensions,
       allowMultiple: true,
     );
 
     if (result == null) return [];
 
+    // Filter to only supported file types
     final paths = result.files
-        .where((f) => f.path != null)
+        .where((f) => f.path != null && isSupportedFile(f.path!))
         .map((f) => f.path!)
         .toList();
 
-    _logger.i('Picked ${paths.length} files');
+    _logger.i('Picked ${paths.length} supported files');
     return paths;
   }
 
