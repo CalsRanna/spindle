@@ -10,6 +10,9 @@ class PlayerViewModel {
   final _audioService = AudioService.instance;
   final _songRepository = SongRepository();
 
+  /// Callback to notify when favorite status changes
+  static void Function()? onFavoriteChanged;
+
   // 所有播放状态由 ViewModel 持有
   final currentSong = Signal<Song?>(null);
   final isPlaying = Signal<bool>(false);
@@ -282,6 +285,9 @@ class PlayerViewModel {
       updatedQueue[index] = currentSong.value!;
       queue.value = updatedQueue;
     }
+
+    // Notify listeners that favorite changed
+    onFavoriteChanged?.call();
   }
 
   String get positionText => _formatDuration(position.value);

@@ -13,67 +13,27 @@ class MobileSettingsPage extends StatelessWidget {
       appBar: AppBar(title: const Text('SETTINGS')),
       body: ListView(
         children: [
-          _buildSectionHeader('PLAYBACK'),
-          _buildSettingsTile(
-            icon: Icons.high_quality,
-            title: 'Audio Quality',
-            subtitle: 'High (320kbps)',
-            onTap: () {},
-          ),
-          _buildSettingsTile(
-            icon: Icons.equalizer,
-            title: 'Equalizer',
-            subtitle: 'Off',
-            onTap: () {},
-          ),
-          _buildSettingsTile(
-            icon: Icons.music_note,
-            title: 'Gapless Playback',
-            trailing: Switch(
-              value: true,
-              onChanged: (value) {},
-              activeTrackColor: AppTheme.accentColor,
-            ),
-          ),
           _buildSectionHeader('LIBRARY'),
-          _buildSettingsTile(
-            icon: Icons.folder,
-            title: 'Scan Folders',
-            subtitle: 'Manage music folders',
+          ListTile(
+            leading: const Icon(Icons.folder, color: AppTheme.textPrimary),
+            title: const Text('Import Music'),
+            subtitle: const Text(
+              'Add music from files or WiFi',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            ),
+            trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
             onTap: () => context.router.push(const MobileImportRoute()),
           ),
-          _buildSettingsTile(
-            icon: Icons.image,
-            title: 'Artworks & Metadata',
-            subtitle: 'Download missing artwork',
-            onTap: () {},
+          _buildSectionHeader('ABOUT'),
+          const ListTile(
+            leading: Icon(Icons.info_outline, color: AppTheme.textPrimary),
+            title: Text('Spindle'),
+            subtitle: Text(
+              'A minimal music player',
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+            ),
           ),
-          _buildSectionHeader('APPEARANCE'),
-          _buildSettingsTile(
-            icon: Icons.dark_mode,
-            title: 'Theme',
-            subtitle: 'Dark',
-            onTap: () {},
-          ),
-          _buildSettingsTile(
-            icon: Icons.apps,
-            title: 'App Icon',
-            subtitle: 'Default',
-            onTap: () {},
-          ),
-          _buildSectionHeader('INFO'),
-          _buildSettingsTile(
-            icon: Icons.info_outline,
-            title: 'About',
-            subtitle: 'Version 1.0.0',
-            onTap: () {},
-          ),
-          _buildSettingsTile(
-            icon: Icons.help_outline,
-            title: 'Help & Support',
-            onTap: () {},
-          ),
-          const SizedBox(height: 160),
+          const SizedBox(height: 80),
         ],
       ),
     );
@@ -91,30 +51,6 @@ class MobileSettingsPage extends StatelessWidget {
           letterSpacing: 1.2,
         ),
       ),
-    );
-  }
-
-  Widget _buildSettingsTile({
-    required IconData icon,
-    required String title,
-    String? subtitle,
-    Widget? trailing,
-    VoidCallback? onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: AppTheme.textPrimary),
-      title: Text(title),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle,
-              style: const TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 13,
-              ),
-            )
-          : null,
-      trailing: trailing ?? const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
-      onTap: onTap,
     );
   }
 }

@@ -19,5 +19,15 @@ class DI {
     getIt.registerFactory<ImportViewModel>(() => ImportViewModel());
     getIt.registerFactory<SearchViewModel>(() => SearchViewModel());
     getIt.registerFactory<QueueViewModel>(() => QueueViewModel());
+
+    // Set up favorite change callback to sync state across ViewModels
+    PlayerViewModel.onFavoriteChanged = () {
+      getIt.get<FavoritesViewModel>().loadFavorites();
+      getIt.get<LibraryViewModel>().loadSongs();
+    };
+
+    FavoritesViewModel.onFavoriteChanged = () {
+      getIt.get<LibraryViewModel>().loadSongs();
+    };
   }
 }

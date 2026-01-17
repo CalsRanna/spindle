@@ -20,7 +20,7 @@ class WiFiTransferService {
   final uploadedFiles = Signal<List<UploadedFile>>([]);
 
   static const _port = 8080;
-  static const _supportedExtensions = [
+  static const _supportedAudioExtensions = [
     '.mp3',
     '.flac',
     '.wav',
@@ -31,6 +31,9 @@ class WiFiTransferService {
     '.aiff',
     '.alac',
   ];
+  static const _supportedLyricsExtensions = ['.lrc'];
+  static List<String> get _supportedExtensions =>
+      [..._supportedAudioExtensions, ..._supportedLyricsExtensions];
 
   /// Start the HTTP server
   Future<bool> startServer() async {
@@ -405,10 +408,10 @@ class WiFiTransferService {
 
   <div class="upload-area" id="dropZone">
     <div class="upload-icon">+</div>
-    <p class="upload-text">Drop audio files here or click to select</p>
-    <p class="upload-hint">Multiple files supported</p>
+    <p class="upload-text">Drop files here or click to select</p>
+    <p class="upload-hint">Audio files and lyrics (.lrc) supported</p>
   </div>
-  <input type="file" id="fileInput" multiple accept=".mp3,.flac,.wav,.aac,.m4a,.ogg,.wma,.aiff,.alac">
+  <input type="file" id="fileInput" multiple accept=".mp3,.flac,.wav,.aac,.m4a,.ogg,.wma,.aiff,.alac,.lrc">
 
   <div class="progress-bar" id="progressBar">
     <div class="progress-fill" id="progressFill"></div>
@@ -417,7 +420,7 @@ class WiFiTransferService {
   <div class="file-list" id="fileList"></div>
 
   <p class="supported-formats">
-    Supported formats: MP3, FLAC, WAV, AAC, M4A, OGG, WMA, AIFF, ALAC
+    Audio: MP3, FLAC, WAV, AAC, M4A, OGG, WMA, AIFF, ALAC | Lyrics: LRC
   </p>
 
   <script>

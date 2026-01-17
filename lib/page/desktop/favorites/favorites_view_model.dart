@@ -8,6 +8,9 @@ class FavoritesViewModel {
   final _songRepository = SongRepository();
   final _playerViewModel = GetIt.instance.get<PlayerViewModel>();
 
+  /// Callback to notify when favorite status changes
+  static void Function()? onFavoriteChanged;
+
   final songs = Signal<List<Song>>([]);
   final isLoading = Signal<bool>(false);
 
@@ -48,5 +51,8 @@ class FavoritesViewModel {
     if (song.id == null) return;
     await _songRepository.toggleFavorite(song.id!);
     await loadFavorites();
+
+    // Notify listeners that favorite changed
+    onFavoriteChanged?.call();
   }
 }

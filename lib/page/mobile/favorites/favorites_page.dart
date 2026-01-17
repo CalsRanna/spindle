@@ -15,13 +15,19 @@ class MobileFavoritesPage extends StatefulWidget {
   State<MobileFavoritesPage> createState() => _MobileFavoritesPageState();
 }
 
-class _MobileFavoritesPageState extends State<MobileFavoritesPage> {
+class _MobileFavoritesPageState extends State<MobileFavoritesPage>
+    with AutoRouteAwareStateMixin {
   late final FavoritesViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
     _viewModel = GetIt.instance.get<FavoritesViewModel>();
+    _viewModel.loadFavorites();
+  }
+
+  @override
+  void didPopNext() {
     _viewModel.loadFavorites();
   }
 
