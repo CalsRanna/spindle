@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:spindle/entity/song.dart';
 import 'package:spindle/page/desktop/library/library_view_model.dart';
+import 'package:spindle/page/desktop/favorites/favorites_view_model.dart';
 import 'package:spindle/router/app_router.gr.dart';
 import 'package:spindle/util/app_theme.dart';
 import 'package:spindle/widget/album_cover.dart';
@@ -20,21 +21,25 @@ class MobileLibraryPage extends StatefulWidget {
 class _MobileLibraryPageState extends State<MobileLibraryPage>
     with AutoRouteAwareStateMixin {
   late final LibraryViewModel _viewModel;
+  late final FavoritesViewModel _favoritesViewModel;
 
   @override
   void initState() {
     super.initState();
     _viewModel = GetIt.instance.get<LibraryViewModel>();
+    _favoritesViewModel = GetIt.instance.get<FavoritesViewModel>();
   }
 
   @override
   void didChangeTabRoute(TabPageRoute previousRoute) {
     _viewModel.loadSongs();
+    _favoritesViewModel.loadFavorites();
   }
 
   @override
   void didPopNext() {
     _viewModel.loadSongs();
+    _favoritesViewModel.loadFavorites();
   }
 
   @override
@@ -44,14 +49,23 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
       final songs = _viewModel.songs.value;
       final recentlyPlayed = _viewModel.recentlyPlayed.value;
       final currentSong = _viewModel.currentSong.value;
+      final favorites = _favoritesViewModel.songs.value;
 
       return Scaffold(
         appBar: AppBar(
           title: const Text('LIBRARY'),
           actions: [
             IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () => context.router.push(const MobileSearchRoute()),
+            ),
+            IconButton(
               icon: const Icon(Icons.add),
               onPressed: () => context.router.push(const MobileImportRoute()),
+            ),
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () => context.router.push(const MobileSettingsRoute()),
             ),
           ],
         ),
@@ -60,10 +74,14 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                 child: CircularProgressIndicator(color: AppTheme.accentColor),
               )
             : RefreshIndicator(
-                onRefresh: _viewModel.loadSongs,
+                onRefresh: () async {
+                  await _viewModel.loadSongs();
+                  await _favoritesViewModel.loadFavorites();
+                },
                 color: AppTheme.accentColor,
                 child: CustomScrollView(
                   slivers: [
+                    // Recently Played Section
                     if (recentlyPlayed.isNotEmpty)
                       SliverToBoxAdapter(
                         child: Column(
@@ -98,6 +116,56 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                           ],
                         ),
                       ),
+
+                    // Favorites Section
+                    if (favorites.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Favorites',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => context.router.push(const MobileFavoritesRoute()),
+                                    child: const Text(
+                                      'SEE ALL',
+                                      style: TextStyle(color: AppTheme.accentColor),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              height: 164,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                itemCount: favorites.length > 10 ? 10 : favorites.length,
+                                itemBuilder: (context, index) {
+                                  final song = favorites[index];
+                                  return _FavoriteCard(
+                                    song: song,
+                                    onTap: () => _favoritesViewModel.playSong(song),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                        ),
+                      ),
+
+                    // All Songs Header
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -123,6 +191,8 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                         ),
                       ),
                     ),
+
+                    // Songs List
                     if (songs.isEmpty)
                       SliverFillRemaining(
                         child: Center(
@@ -164,7 +234,7 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                           );
                         }, childCount: songs.length),
                       ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 160)),
+                    const SliverToBoxAdapter(child: SizedBox(height: 80)),
                   ],
                 ),
               ),
@@ -200,8 +270,10 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                 title: Text(
                   song.isFavorite ? 'Remove from Favorites' : 'Add to Favorites',
                 ),
-                onTap: () {
+                onTap: () async {
                   Navigator.pop(context);
+                  await _favoritesViewModel.toggleFavorite(song);
+                  await _viewModel.loadSongs();
                 },
               ),
               ListTile(
@@ -308,6 +380,74 @@ class _RecentlyPlayedCard extends StatelessWidget {
               imagePath: song.albumArtPath,
               size: 120,
               borderRadius: 8,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              song.title,
+              style: const TextStyle(
+                color: AppTheme.textPrimary,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              song.displayArtist,
+              style: const TextStyle(
+                color: AppTheme.textSecondary,
+                fontSize: 11,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FavoriteCard extends StatelessWidget {
+  final Song song;
+  final VoidCallback onTap;
+
+  const _FavoriteCard({required this.song, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 120,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                AlbumCover(
+                  imagePath: song.albumArtPath,
+                  size: 120,
+                  borderRadius: 8,
+                ),
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.favorite,
+                      color: AppTheme.accentColor,
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Text(

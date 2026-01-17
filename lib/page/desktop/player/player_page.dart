@@ -275,7 +275,7 @@ class _DesktopPlayerPageState extends State<DesktopPlayerPage> {
                       : Icons.favorite_border,
                   color: currentSong.isFavorite ? AppTheme.accentColor : null,
                 ),
-                onPressed: () {},
+                onPressed: _viewModel.toggleFavorite,
               ),
               IconButton(
                 icon: const Icon(Icons.edit_note),

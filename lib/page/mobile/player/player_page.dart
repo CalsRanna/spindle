@@ -95,9 +95,45 @@ class _MobilePlayerPageState extends State<MobilePlayerPage> {
                           color: AppTheme.textSecondary,
                         ),
                       ),
-                      IconButton(
+                      PopupMenuButton<String>(
                         icon: const Icon(Icons.more_vert),
-                        onPressed: () {},
+                        color: AppTheme.cardBackground,
+                        onSelected: (value) {
+                          switch (value) {
+                            case 'metadata':
+                              context.router.push(
+                                MobileMetadataEditorRoute(song: currentSong),
+                              );
+                              break;
+                            case 'lyrics':
+                              context.router.push(
+                                MobileLyricsEditorRoute(song: currentSong),
+                              );
+                              break;
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'metadata',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit, size: 20),
+                                SizedBox(width: 12),
+                                Text('Edit Metadata'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'lyrics',
+                            child: Row(
+                              children: [
+                                Icon(Icons.lyrics, size: 20),
+                                SizedBox(width: 12),
+                                Text('Edit Lyrics'),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -116,7 +152,9 @@ class _MobilePlayerPageState extends State<MobilePlayerPage> {
                           children: [
                             // Page 0: Album Cover
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 32),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 32,
+                              ),
                               child: Center(
                                 child: AlbumCover(
                                   imagePath: currentSong.albumArtPath,
@@ -127,7 +165,9 @@ class _MobilePlayerPageState extends State<MobilePlayerPage> {
                             ),
                             // Page 1: Lyrics
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
                               child: LyricsView(position: position),
                             ),
                           ],
@@ -147,7 +187,9 @@ class _MobilePlayerPageState extends State<MobilePlayerPage> {
                                 shape: BoxShape.circle,
                                 color: _currentPage == index
                                     ? AppTheme.accentColor
-                                    : AppTheme.textSecondary.withValues(alpha: 0.3),
+                                    : AppTheme.textSecondary.withValues(
+                                        alpha: 0.3,
+                                      ),
                               ),
                             );
                           }),
@@ -199,7 +241,7 @@ class _MobilePlayerPageState extends State<MobilePlayerPage> {
                                   ? AppTheme.accentColor
                                   : null,
                             ),
-                            onPressed: () {},
+                            onPressed: _viewModel.toggleFavorite,
                           ),
                           IconButton(
                             icon: const Icon(Icons.queue_music),
@@ -211,42 +253,37 @@ class _MobilePlayerPageState extends State<MobilePlayerPage> {
                       const SizedBox(height: 24),
 
                       // Progress bar
-                      Column(
+                      Row(
                         children: [
-                          SliderTheme(
-                            data: SliderTheme.of(context).copyWith(
-                              trackHeight: 4,
-                              thumbShape: const RoundSliderThumbShape(
-                                enabledThumbRadius: 6,
-                              ),
-                            ),
-                            child: Slider(
-                              value: progress.clamp(0.0, 1.0),
-                              onChanged: _viewModel.seekToPercent,
-                              activeColor: AppTheme.accentColor,
-                              inactiveColor: AppTheme.dividerColor,
+                          Text(
+                            _viewModel.positionText,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textSecondary,
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  _viewModel.positionText,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppTheme.textSecondary,
-                                  ),
+                          Expanded(
+                            child: SliderTheme(
+                              data: SliderTheme.of(context).copyWith(
+                                trackHeight: 4,
+                                thumbShape: const RoundSliderThumbShape(
+                                  enabledThumbRadius: 6,
                                 ),
-                                Text(
-                                  _viewModel.durationText,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppTheme.textSecondary,
-                                  ),
-                                ),
-                              ],
+                              ),
+                              child: Slider(
+                                value: progress.clamp(0.0, 1.0),
+                                onChanged: _viewModel.seekToPercent,
+                                activeColor: AppTheme.accentColor,
+                                inactiveColor: AppTheme.dividerColor,
+                              ),
+                            ),
+                          ),
+
+                          Text(
+                            _viewModel.durationText,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppTheme.textSecondary,
                             ),
                           ),
                         ],

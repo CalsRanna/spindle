@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:just_audio/just_audio.dart';
 import 'package:signals/signals.dart';
 import 'package:spindle/entity/song.dart';
+import 'package:spindle/repository/song_repository.dart';
 import 'package:spindle/service/audio_service.dart';
 
 class PlayerViewModel {
   final _audioService = AudioService.instance;
+  final _songRepository = SongRepository();
 
   // 所有播放状态由 ViewModel 持有
   final currentSong = Signal<Song?>(null);
@@ -261,6 +263,25 @@ class PlayerViewModel {
   void clearQueue() {
     queue.value = [];
     currentIndex.value = 0;
+  }
+
+  Future<void> toggleFavorite() async {
+    final song = currentSong.value;
+    if (song?.id == null) return;
+
+    await _songRepository.toggleFavorite(song!.id!);
+
+    // Update currentSong with new favorite status
+    currentSong.value = song.copyWith(isFavorite: !song.isFavorite);
+
+    // Also update the song in the queue
+    final q = queue.value;
+    final index = q.indexWhere((s) => s.id == song.id);
+    if (index >= 0) {
+      final updatedQueue = List<Song>.from(q);
+      updatedQueue[index] = currentSong.value!;
+      queue.value = updatedQueue;
+    }
   }
 
   String get positionText => _formatDuration(position.value);

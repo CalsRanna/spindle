@@ -21,6 +21,7 @@ class AppRouter extends RootStackRouter {
     CustomRoute(
       page: DesktopPlayerRoute.page,
       transitionsBuilder: TransitionsBuilders.slideBottom,
+      opaque: false,
     ),
     AutoRoute(page: DesktopQueueRoute.page),
     AutoRoute(page: DesktopImportRoute.page),
@@ -34,14 +35,15 @@ class AppRouter extends RootStackRouter {
       initial: !_isDesktop,
       children: [
         AutoRoute(page: MobileLibraryRoute.page, initial: true),
-        AutoRoute(page: MobileSearchRoute.page),
-        AutoRoute(page: MobileFavoritesRoute.page),
-        AutoRoute(page: MobileSettingsRoute.page),
       ],
     ),
+    AutoRoute(page: MobileSearchRoute.page),
+    AutoRoute(page: MobileFavoritesRoute.page),
+    AutoRoute(page: MobileSettingsRoute.page),
     CustomRoute(
       page: MobilePlayerRoute.page,
       transitionsBuilder: TransitionsBuilders.slideBottom,
+      opaque: false,
     ),
     AutoRoute(page: MobileQueueRoute.page),
     AutoRoute(page: MobileImportRoute.page),
