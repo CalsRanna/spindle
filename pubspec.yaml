@@ -2,7 +2,7 @@ name: spindle
 description: "A local music player app."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.0+16
 
 environment:
   sdk: ^3.10.0
