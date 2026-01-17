@@ -3,20 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:spindle/entity/song.dart';
-import 'package:spindle/page/favorites/favorites_view_model.dart';
+import 'package:spindle/page/desktop/favorites/favorites_view_model.dart';
 import 'package:spindle/service/audio_service.dart';
 import 'package:spindle/util/app_theme.dart';
 import 'package:spindle/widget/song_tile.dart';
 
 @RoutePage()
-class FavoritesPage extends StatefulWidget {
-  const FavoritesPage({super.key});
+class MobileFavoritesPage extends StatefulWidget {
+  const MobileFavoritesPage({super.key});
 
   @override
-  State<FavoritesPage> createState() => _FavoritesPageState();
+  State<MobileFavoritesPage> createState() => _MobileFavoritesPageState();
 }
 
-class _FavoritesPageState extends State<FavoritesPage> {
+class _MobileFavoritesPageState extends State<MobileFavoritesPage> {
   late final FavoritesViewModel _viewModel;
 
   @override
@@ -82,7 +82,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   onRefresh: _viewModel.loadFavorites,
                   color: AppTheme.accentColor,
                   child: ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 80),
+                    padding: const EdgeInsets.only(bottom: 160),
                     itemCount: songs.length,
                     itemBuilder: (context, index) {
                       final song = songs[index];

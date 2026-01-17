@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:spindle/entity/song.dart';
-import 'package:spindle/page/library/library_view_model.dart';
+import 'package:spindle/page/desktop/library/library_view_model.dart';
 import 'package:spindle/router/app_router.gr.dart';
 import 'package:spindle/service/audio_service.dart';
 import 'package:spindle/util/app_theme.dart';
@@ -11,14 +11,14 @@ import 'package:spindle/widget/album_cover.dart';
 import 'package:spindle/widget/song_tile.dart';
 
 @RoutePage()
-class LibraryPage extends StatefulWidget {
-  const LibraryPage({super.key});
+class MobileLibraryPage extends StatefulWidget {
+  const MobileLibraryPage({super.key});
 
   @override
-  State<LibraryPage> createState() => _LibraryPageState();
+  State<MobileLibraryPage> createState() => _MobileLibraryPageState();
 }
 
-class _LibraryPageState extends State<LibraryPage>
+class _MobileLibraryPageState extends State<MobileLibraryPage>
     with AutoRouteAwareStateMixin {
   late final LibraryViewModel _viewModel;
 
@@ -30,13 +30,11 @@ class _LibraryPageState extends State<LibraryPage>
 
   @override
   void didChangeTabRoute(TabPageRoute previousRoute) {
-    // Called when this tab becomes active again
     _viewModel.loadSongs();
   }
 
   @override
   void didPopNext() {
-    // Called when returning from a pushed route (e.g., Import page)
     _viewModel.loadSongs();
   }
 
@@ -52,16 +50,8 @@ class _LibraryPageState extends State<LibraryPage>
         title: const Text('LIBRARY'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () => context.router.push(const SearchRoute()),
-          ),
-          IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => context.router.push(const ImportRoute()),
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => context.router.push(const SettingsRoute()),
+            onPressed: () => context.router.push(const MobileImportRoute()),
           ),
         ],
       ),
@@ -74,7 +64,6 @@ class _LibraryPageState extends State<LibraryPage>
               color: AppTheme.accentColor,
               child: CustomScrollView(
                 slivers: [
-                  // Recently Played Section
                   if (recentlyPlayed.isNotEmpty)
                     SliverToBoxAdapter(
                       child: Column(
@@ -94,9 +83,7 @@ class _LibraryPageState extends State<LibraryPage>
                             height: 164,
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
                               itemCount: recentlyPlayed.length,
                               itemBuilder: (context, index) {
                                 final song = recentlyPlayed[index];
@@ -111,8 +98,6 @@ class _LibraryPageState extends State<LibraryPage>
                         ],
                       ),
                     ),
-
-                  // All Songs Header
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -138,8 +123,6 @@ class _LibraryPageState extends State<LibraryPage>
                       ),
                     ),
                   ),
-
-                  // Songs List
                   if (songs.isEmpty)
                     SliverFillRemaining(
                       child: Center(
@@ -162,7 +145,7 @@ class _LibraryPageState extends State<LibraryPage>
                             const SizedBox(height: 8),
                             TextButton(
                               onPressed: () =>
-                                  context.router.push(const ImportRoute()),
+                                  context.router.push(const MobileImportRoute()),
                               child: const Text('Import Music'),
                             ),
                           ],
@@ -181,9 +164,7 @@ class _LibraryPageState extends State<LibraryPage>
                         );
                       }, childCount: songs.length),
                     ),
-
-                  // Bottom padding for mini player
-                  const SliverToBoxAdapter(child: SizedBox(height: 80)),
+                  const SliverToBoxAdapter(child: SizedBox(height: 160)),
                 ],
               ),
             ),
@@ -216,9 +197,7 @@ class _LibraryPageState extends State<LibraryPage>
                   color: song.isFavorite ? AppTheme.accentColor : null,
                 ),
                 title: Text(
-                  song.isFavorite
-                      ? 'Remove from Favorites'
-                      : 'Add to Favorites',
+                  song.isFavorite ? 'Remove from Favorites' : 'Add to Favorites',
                 ),
                 onTap: () {
                   Navigator.pop(context);

@@ -4,18 +4,18 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:spindle/page/import/import_view_model.dart';
+import 'package:spindle/page/desktop/import/import_view_model.dart';
 import 'package:spindle/util/app_theme.dart';
 
 @RoutePage()
-class ImportPage extends StatefulWidget {
-  const ImportPage({super.key});
+class DesktopImportPage extends StatefulWidget {
+  const DesktopImportPage({super.key});
 
   @override
-  State<ImportPage> createState() => _ImportPageState();
+  State<DesktopImportPage> createState() => _DesktopImportPageState();
 }
 
-class _ImportPageState extends State<ImportPage> {
+class _DesktopImportPageState extends State<DesktopImportPage> {
   late final ImportViewModel _viewModel;
 
   @override

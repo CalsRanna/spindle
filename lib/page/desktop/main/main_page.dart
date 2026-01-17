@@ -5,14 +5,14 @@ import 'package:spindle/widget/mini_player.dart';
 import 'package:spindle/widget/sidebar.dart';
 
 @RoutePage()
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+class DesktopMainPage extends StatefulWidget {
+  const DesktopMainPage({super.key});
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<DesktopMainPage> createState() => _DesktopMainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _DesktopMainPageState extends State<DesktopMainPage> {
   SidebarItem _selectedItem = SidebarItem.library;
 
   void _onSidebarItemSelected(SidebarItem item) {
@@ -22,16 +22,16 @@ class _MainPageState extends State<MainPage> {
 
     switch (item) {
       case SidebarItem.search:
-        context.router.replace(const SearchRoute());
+        context.router.replace(const DesktopSearchRoute());
         break;
       case SidebarItem.library:
-        context.router.replace(const LibraryRoute());
+        context.router.replace(const DesktopLibraryRoute());
         break;
       case SidebarItem.favorites:
-        context.router.replace(const FavoritesRoute());
+        context.router.replace(const DesktopFavoritesRoute());
         break;
       case SidebarItem.settings:
-        context.router.replace(const SettingsRoute());
+        context.router.replace(const DesktopSettingsRoute());
         break;
     }
   }
@@ -68,7 +68,7 @@ class _MainPageState extends State<MainPage> {
                   right: 0,
                   bottom: 0,
                   child: MiniPlayer(
-                    onTap: () => context.router.push(const PlayerRoute()),
+                    onTap: () => context.router.push(const DesktopPlayerRoute()),
                   ),
                 ),
               ],
@@ -89,7 +89,7 @@ class _MainPageState extends State<MainPage> {
             right: 0,
             bottom: 0,
             child: MiniPlayer(
-              onTap: () => context.router.push(const PlayerRoute()),
+              onTap: () => context.router.push(const DesktopPlayerRoute()),
             ),
           ),
         ],

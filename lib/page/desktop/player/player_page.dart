@@ -2,7 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:spindle/page/player/player_view_model.dart';
+import 'package:spindle/page/desktop/player/player_view_model.dart';
 import 'package:spindle/router/app_router.gr.dart';
 import 'package:spindle/service/audio_service.dart';
 import 'package:spindle/service/lyrics_service.dart';
@@ -12,14 +12,14 @@ import 'package:spindle/widget/blur_background.dart';
 import 'package:spindle/widget/lyrics_view.dart';
 
 @RoutePage()
-class PlayerPage extends StatefulWidget {
-  const PlayerPage({super.key});
+class DesktopPlayerPage extends StatefulWidget {
+  const DesktopPlayerPage({super.key});
 
   @override
-  State<PlayerPage> createState() => _PlayerPageState();
+  State<DesktopPlayerPage> createState() => _DesktopPlayerPageState();
 }
 
-class _PlayerPageState extends State<PlayerPage> {
+class _DesktopPlayerPageState extends State<DesktopPlayerPage> {
   late final PlayerViewModel _viewModel;
   final _audioService = AudioService.instance;
   final _lyricsService = LyricsService.instance;
@@ -212,7 +212,7 @@ class _PlayerPageState extends State<PlayerPage> {
     required double albumCoverSize,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -265,14 +265,13 @@ class _PlayerPageState extends State<PlayerPage> {
               ),
               IconButton(
                 icon: const Icon(Icons.edit_note),
-                onPressed: () => context.router.push(
-                  LyricsEditorRoute(song: currentSong),
-                ),
+                onPressed: () =>
+                    context.router.push(DesktopLyricsEditorRoute(song: currentSong)),
                 tooltip: 'Edit lyrics',
               ),
               IconButton(
                 icon: const Icon(Icons.list),
-                onPressed: () => context.router.push(const QueueRoute()),
+                onPressed: () => context.router.push(const DesktopQueueRoute()),
               ),
             ],
           ),
@@ -280,42 +279,36 @@ class _PlayerPageState extends State<PlayerPage> {
           const SizedBox(height: 24),
 
           // Progress bar
-          Column(
+          Row(
             children: [
-              SliderTheme(
-                data: SliderTheme.of(context).copyWith(
-                  trackHeight: 4,
-                  thumbShape: const RoundSliderThumbShape(
-                    enabledThumbRadius: 6,
-                  ),
-                ),
-                child: Slider(
-                  value: progress.clamp(0.0, 1.0),
-                  onChanged: _viewModel.seekToPercent,
-                  activeColor: AppTheme.accentColor,
-                  inactiveColor: AppTheme.dividerColor,
+              Text(
+                _viewModel.positionText,
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 12,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _viewModel.positionText,
-                      style: const TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 12,
-                      ),
+              Expanded(
+                child: SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackHeight: 4,
+                    thumbShape: const RoundSliderThumbShape(
+                      enabledThumbRadius: 6,
                     ),
-                    Text(
-                      _viewModel.durationText,
-                      style: const TextStyle(
-                        color: AppTheme.textSecondary,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
+                  ),
+                  child: Slider(
+                    value: progress.clamp(0.0, 1.0),
+                    onChanged: _viewModel.seekToPercent,
+                    activeColor: AppTheme.accentColor,
+                    inactiveColor: AppTheme.dividerColor,
+                  ),
+                ),
+              ),
+              Text(
+                _viewModel.durationText,
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 12,
                 ),
               ),
             ],

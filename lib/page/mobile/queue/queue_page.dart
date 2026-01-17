@@ -2,19 +2,19 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:spindle/page/queue/queue_view_model.dart';
+import 'package:spindle/page/desktop/queue/queue_view_model.dart';
 import 'package:spindle/util/app_theme.dart';
 import 'package:spindle/widget/album_cover.dart';
 
 @RoutePage()
-class QueuePage extends StatefulWidget {
-  const QueuePage({super.key});
+class MobileQueuePage extends StatefulWidget {
+  const MobileQueuePage({super.key});
 
   @override
-  State<QueuePage> createState() => _QueuePageState();
+  State<MobileQueuePage> createState() => _MobileQueuePageState();
 }
 
-class _QueuePageState extends State<QueuePage> {
+class _MobileQueuePageState extends State<MobileQueuePage> {
   late final QueueViewModel _viewModel;
 
   @override
@@ -50,18 +50,11 @@ class _QueuePageState extends State<QueuePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.queue_music,
-                    size: 64,
-                    color: AppTheme.textSecondary,
-                  ),
+                  Icon(Icons.queue_music, size: 64, color: AppTheme.textSecondary),
                   SizedBox(height: 16),
                   Text(
                     'Queue is empty',
-                    style: TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
                   ),
                 ],
               ),
@@ -74,7 +67,6 @@ class _QueuePageState extends State<QueuePage> {
                 final isCurrent = index == currentIndex;
                 final isUpNext = index > currentIndex;
 
-                // Add section headers
                 Widget? header;
                 if (index == currentIndex) {
                   header = _buildSectionHeader('NOW PLAYING');
@@ -109,11 +101,8 @@ class _QueuePageState extends State<QueuePage> {
                       title: Text(
                         song.title,
                         style: TextStyle(
-                          color: isCurrent
-                              ? AppTheme.accentColor
-                              : AppTheme.textPrimary,
-                          fontWeight:
-                              isCurrent ? FontWeight.w600 : FontWeight.normal,
+                          color: isCurrent ? AppTheme.accentColor : AppTheme.textPrimary,
+                          fontWeight: isCurrent ? FontWeight.w600 : FontWeight.normal,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -135,8 +124,7 @@ class _QueuePageState extends State<QueuePage> {
                                 Icons.remove_circle_outline,
                                 color: AppTheme.textSecondary,
                               ),
-                              onPressed: () =>
-                                  _viewModel.removeFromQueue(index),
+                              onPressed: () => _viewModel.removeFromQueue(index),
                             )
                           : null,
                       onTap: () => _viewModel.playSongAt(index),

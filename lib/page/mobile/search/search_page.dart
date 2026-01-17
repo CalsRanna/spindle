@@ -2,20 +2,20 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:spindle/page/search/search_view_model.dart';
+import 'package:spindle/page/desktop/search/search_view_model.dart';
 import 'package:spindle/service/audio_service.dart';
 import 'package:spindle/util/app_theme.dart';
 import 'package:spindle/widget/song_tile.dart';
 
 @RoutePage()
-class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+class MobileSearchPage extends StatefulWidget {
+  const MobileSearchPage({super.key});
 
   @override
-  State<SearchPage> createState() => _SearchPageState();
+  State<MobileSearchPage> createState() => _MobileSearchPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
+class _MobileSearchPageState extends State<MobileSearchPage> {
   late final SearchViewModel _viewModel;
   final _searchController = TextEditingController();
 
@@ -39,16 +39,9 @@ class _SearchPageState extends State<SearchPage> {
     final currentSong = AudioService.instance.currentSong.watch(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('SEARCH'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.router.maybePop(),
-        ),
-      ),
+      appBar: AppBar(title: const Text('SEARCH')),
       body: Column(
         children: [
-          // Search bar
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
@@ -70,8 +63,6 @@ class _SearchPageState extends State<SearchPage> {
               onChanged: _viewModel.search,
             ),
           ),
-
-          // Results
           Expanded(
             child: _buildContent(query, results, isSearching, currentSong),
           ),
@@ -86,18 +77,11 @@ class _SearchPageState extends State<SearchPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.search,
-              size: 64,
-              color: AppTheme.textSecondary,
-            ),
+            Icon(Icons.search, size: 64, color: AppTheme.textSecondary),
             SizedBox(height: 16),
             Text(
               'Search for your music',
-              style: TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 16,
-              ),
+              style: TextStyle(color: AppTheme.textSecondary, fontSize: 16),
             ),
           ],
         ),
@@ -106,9 +90,7 @@ class _SearchPageState extends State<SearchPage> {
 
     if (isSearching) {
       return const Center(
-        child: CircularProgressIndicator(
-          color: AppTheme.accentColor,
-        ),
+        child: CircularProgressIndicator(color: AppTheme.accentColor),
       );
     }
 
@@ -117,18 +99,11 @@ class _SearchPageState extends State<SearchPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.music_off,
-              size: 64,
-              color: AppTheme.textSecondary,
-            ),
+            const Icon(Icons.music_off, size: 64, color: AppTheme.textSecondary),
             const SizedBox(height: 16),
             Text(
               'No results for "$query"',
-              style: const TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 16,
-              ),
+              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 16),
             ),
           ],
         ),

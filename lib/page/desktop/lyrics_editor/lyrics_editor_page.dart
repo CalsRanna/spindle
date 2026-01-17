@@ -4,21 +4,21 @@ import 'package:flutter/services.dart';
 import 'package:signals/signals_flutter.dart';
 
 import 'package:spindle/entity/song.dart';
-import 'package:spindle/page/lyrics_editor/lyrics_editor_view_model.dart';
+import 'package:spindle/page/desktop/lyrics_editor/lyrics_editor_view_model.dart';
 import 'package:spindle/service/audio_service.dart';
 import 'package:spindle/util/app_theme.dart';
 
 @RoutePage()
-class LyricsEditorPage extends StatefulWidget {
+class DesktopLyricsEditorPage extends StatefulWidget {
   final Song song;
 
-  const LyricsEditorPage({super.key, required this.song});
+  const DesktopLyricsEditorPage({super.key, required this.song});
 
   @override
-  State<LyricsEditorPage> createState() => _LyricsEditorPageState();
+  State<DesktopLyricsEditorPage> createState() => _DesktopLyricsEditorPageState();
 }
 
-class _LyricsEditorPageState extends State<LyricsEditorPage> {
+class _DesktopLyricsEditorPageState extends State<DesktopLyricsEditorPage> {
   final _viewModel = LyricsEditorViewModel();
   final _textController = TextEditingController();
   final _focusNode = FocusNode();

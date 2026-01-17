@@ -4,15 +4,13 @@ import 'package:spindle/router/app_router.gr.dart';
 import 'package:spindle/util/app_theme.dart';
 
 @RoutePage()
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+class MobileSettingsPage extends StatelessWidget {
+  const MobileSettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('SETTINGS'),
-      ),
+      appBar: AppBar(title: const Text('SETTINGS')),
       body: ListView(
         children: [
           _buildSectionHeader('PLAYBACK'),
@@ -37,13 +35,12 @@ class SettingsPage extends StatelessWidget {
               activeTrackColor: AppTheme.accentColor,
             ),
           ),
-
           _buildSectionHeader('LIBRARY'),
           _buildSettingsTile(
             icon: Icons.folder,
             title: 'Scan Folders',
             subtitle: 'Manage music folders',
-            onTap: () => context.router.push(const ImportRoute()),
+            onTap: () => context.router.push(const MobileImportRoute()),
           ),
           _buildSettingsTile(
             icon: Icons.image,
@@ -51,7 +48,6 @@ class SettingsPage extends StatelessWidget {
             subtitle: 'Download missing artwork',
             onTap: () {},
           ),
-
           _buildSectionHeader('APPEARANCE'),
           _buildSettingsTile(
             icon: Icons.dark_mode,
@@ -65,7 +61,6 @@ class SettingsPage extends StatelessWidget {
             subtitle: 'Default',
             onTap: () {},
           ),
-
           _buildSectionHeader('INFO'),
           _buildSettingsTile(
             icon: Icons.info_outline,
@@ -78,8 +73,7 @@ class SettingsPage extends StatelessWidget {
             title: 'Help & Support',
             onTap: () {},
           ),
-
-          const SizedBox(height: 80),
+          const SizedBox(height: 160),
         ],
       ),
     );
