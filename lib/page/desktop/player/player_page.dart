@@ -23,16 +23,34 @@ class _DesktopPlayerPageState extends State<DesktopPlayerPage> {
   late final PlayerViewModel _viewModel;
   final _audioService = AudioService.instance;
   final _lyricsService = LyricsService.instance;
+  String? _lastLoadedSongPath;
+  EffectCleanup? _effectCleanup;
 
   @override
   void initState() {
     super.initState();
     _viewModel = GetIt.instance.get<PlayerViewModel>();
     _loadLyrics();
+
+    // Listen for song changes
+    _effectCleanup = effect(() {
+      final currentPath = _audioService.currentSong.value?.filePath;
+      if (currentPath != _lastLoadedSongPath) {
+        _lastLoadedSongPath = currentPath;
+        _lyricsService.loadLyrics(currentPath);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _effectCleanup?.call();
+    super.dispose();
   }
 
   void _loadLyrics() {
     final currentSong = _audioService.currentSong.value;
+    _lastLoadedSongPath = currentSong?.filePath;
     _lyricsService.loadLyrics(currentSong?.filePath);
   }
 
@@ -43,11 +61,6 @@ class _DesktopPlayerPageState extends State<DesktopPlayerPage> {
     if (currentSong == null) {
       return const Scaffold(body: Center(child: Text('No song playing')));
     }
-
-    // Reload lyrics when song changes
-    effect(() {
-      _lyricsService.loadLyrics(_audioService.currentSong.value?.filePath);
-    });
 
     final isPlaying = _audioService.isPlaying.watch(context);
     final position = _audioService.position.watch(context);

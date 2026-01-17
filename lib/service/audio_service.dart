@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:audio_service/audio_service.dart' as audio;
 import 'package:audio_session/audio_session.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:signals/signals.dart';
@@ -15,6 +16,8 @@ class AudioService {
   final _player = AudioPlayer();
   final _songRepository = SongRepository();
   final _historyRepository = PlayHistoryRepository();
+
+  _SpindleAudioHandler? _audioHandler;
 
   // Signals for reactive state
   final currentSong = Signal<Song?>(null);
@@ -37,12 +40,24 @@ class AudioService {
   Future<void> init() async {
     if (_initialized) return;
 
+    // Initialize audio_service handler
+    _audioHandler = await audio.AudioService.init(
+      builder: () => _SpindleAudioHandler(this),
+      config: const audio.AudioServiceConfig(
+        androidNotificationChannelId: 'com.example.spindle.audio',
+        androidNotificationChannelName: 'Spindle Audio',
+        androidNotificationOngoing: true,
+        androidStopForegroundOnPause: true,
+      ),
+    );
+
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration(
       avAudioSessionCategory: AVAudioSessionCategory.playback,
-      avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.mixWithOthers,
+      avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.none,
       avAudioSessionMode: AVAudioSessionMode.defaultMode,
-      avAudioSessionRouteSharingPolicy: AVAudioSessionRouteSharingPolicy.defaultPolicy,
+      avAudioSessionRouteSharingPolicy:
+          AVAudioSessionRouteSharingPolicy.defaultPolicy,
       avAudioSessionSetActiveOptions: AVAudioSessionSetActiveOptions.none,
       androidAudioAttributes: AndroidAudioAttributes(
         contentType: AndroidAudioContentType.music,
@@ -79,15 +94,18 @@ class AudioService {
   void _initListeners() {
     _player.playingStream.listen((playing) {
       isPlaying.value = playing;
+      _updatePlaybackState();
     });
 
     _player.positionStream.listen((pos) {
       position.value = pos;
+      _updatePlaybackState();
     });
 
     _player.durationStream.listen((dur) {
       if (dur != null) {
         duration.value = dur;
+        _updateMediaItem();
       }
     });
 
@@ -96,6 +114,44 @@ class AudioService {
         _onSongComplete();
       }
     });
+  }
+
+  void _updateMediaItem() {
+    final song = currentSong.value;
+    if (song == null || _audioHandler == null) return;
+
+    _audioHandler!.setMediaItem(audio.MediaItem(
+      id: song.id?.toString() ?? song.filePath,
+      title: song.title,
+      artist: song.artist ?? 'Unknown Artist',
+      album: song.album ?? 'Unknown Album',
+      duration: duration.value,
+      artUri: song.albumArtPath != null ? Uri.file(song.albumArtPath!) : null,
+    ));
+  }
+
+  void _updatePlaybackState() {
+    if (!_initialized || _audioHandler == null) return;
+
+    _audioHandler!.setPlaybackState(audio.PlaybackState(
+      controls: [
+        audio.MediaControl.skipToPrevious,
+        isPlaying.value ? audio.MediaControl.pause : audio.MediaControl.play,
+        audio.MediaControl.skipToNext,
+      ],
+      systemActions: const {
+        audio.MediaAction.seek,
+        audio.MediaAction.seekForward,
+        audio.MediaAction.seekBackward,
+      },
+      androidCompactActionIndices: const [0, 1, 2],
+      processingState: audio.AudioProcessingState.ready,
+      playing: isPlaying.value,
+      updatePosition: position.value,
+      bufferedPosition: Duration.zero,
+      speed: 1.0,
+      queueIndex: currentIndex.value,
+    ));
   }
 
   Future<void> playSong(Song song) async {
@@ -108,6 +164,7 @@ class AudioService {
     }
 
     currentSong.value = song;
+    _updateMediaItem();
 
     // Record play history
     if (song.id != null) {
@@ -160,7 +217,6 @@ class AudioService {
     if (songs.isEmpty) return;
 
     final randomIndex = DateTime.now().millisecondsSinceEpoch % songs.length;
-    final randomSong = songs[randomIndex];
     await playQueue(songs, startIndex: randomIndex);
   }
 
@@ -335,5 +391,51 @@ class AudioService {
     shuffleMode.dispose();
     repeatMode.dispose();
     volume.dispose();
+  }
+}
+
+/// AudioHandler for system media integration
+class _SpindleAudioHandler extends audio.BaseAudioHandler
+    with audio.SeekHandler, audio.QueueHandler {
+  final AudioService _service;
+
+  _SpindleAudioHandler(this._service);
+
+  void setMediaItem(audio.MediaItem item) {
+    mediaItem.add(item);
+  }
+
+  void setPlaybackState(audio.PlaybackState state) {
+    playbackState.add(state);
+  }
+
+  @override
+  Future<void> play() async {
+    await _service.play();
+  }
+
+  @override
+  Future<void> pause() async {
+    await _service.pause();
+  }
+
+  @override
+  Future<void> stop() async {
+    await _service.stop();
+  }
+
+  @override
+  Future<void> seek(Duration position) async {
+    await _service.seek(position);
+  }
+
+  @override
+  Future<void> skipToNext() async {
+    await _service.next();
+  }
+
+  @override
+  Future<void> skipToPrevious() async {
+    await _service.previous();
   }
 }
