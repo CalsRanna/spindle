@@ -75,7 +75,7 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
               )
             : RefreshIndicator(
                 onRefresh: () async {
-                  await _viewModel.loadSongs();
+                  await _viewModel.refresh();
                   await _favoritesViewModel.loadFavorites();
                 },
                 color: AppTheme.accentColor,
