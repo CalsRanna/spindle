@@ -203,6 +203,14 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                   Navigator.pop(context);
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Edit Metadata'),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.router.push(MobileMetadataEditorRoute(song: song));
+                },
+              ),
             ],
           ),
         );

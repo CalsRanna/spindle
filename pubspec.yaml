@@ -62,6 +62,7 @@ dependencies:
   # Collection utilities
   collection: ^1.18.0
   macos_secure_bookmarks: ^0.2.1
+  metadata_god: ^1.1.0
 
 dev_dependencies:
   flutter_test:

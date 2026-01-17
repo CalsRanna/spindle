@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:metadata_god/metadata_god.dart';
 import 'package:signals/signals.dart';
 import 'package:spindle/database/database.dart';
 import 'package:spindle/di.dart';
@@ -16,6 +17,7 @@ void main() async {
 
   await Database.instance.ensureInitialized();
   await DI.ensureInitialized();
+  await MetadataGod.initialize();
 
   // Restore macOS security-scoped bookmarks for folder access
   if (Platform.isMacOS) {

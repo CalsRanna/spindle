@@ -22,6 +22,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: DesktopQueueRoute.page),
     AutoRoute(page: DesktopImportRoute.page),
     AutoRoute(page: DesktopLyricsEditorRoute.page),
+    AutoRoute(page: DesktopMetadataEditorRoute.page),
 
     // Mobile routes
     AutoRoute(
@@ -38,6 +39,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: MobileQueueRoute.page),
     AutoRoute(page: MobileImportRoute.page),
     AutoRoute(page: MobileLyricsEditorRoute.page),
+    AutoRoute(page: MobileMetadataEditorRoute.page),
   ];
 
   static bool get _isDesktop =>

@@ -9,39 +9,43 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i19;
-import 'package:flutter/material.dart' as _i20;
-import 'package:spindle/entity/song.dart' as _i21;
+import 'package:auto_route/auto_route.dart' as _i21;
+import 'package:flutter/material.dart' as _i22;
+import 'package:spindle/entity/song.dart' as _i23;
 import 'package:spindle/page/desktop/favorites/favorites_page.dart' as _i1;
 import 'package:spindle/page/desktop/import/import_page.dart' as _i2;
 import 'package:spindle/page/desktop/library/library_page.dart' as _i3;
 import 'package:spindle/page/desktop/lyrics_editor/lyrics_editor_page.dart'
     as _i4;
 import 'package:spindle/page/desktop/main/main_page.dart' as _i5;
-import 'package:spindle/page/desktop/player/player_page.dart' as _i6;
-import 'package:spindle/page/desktop/queue/queue_page.dart' as _i7;
-import 'package:spindle/page/desktop/search/search_page.dart' as _i8;
-import 'package:spindle/page/desktop/settings/settings_page.dart' as _i9;
-import 'package:spindle/page/mobile/favorites/favorites_page.dart' as _i10;
-import 'package:spindle/page/mobile/import/import_page.dart' as _i11;
-import 'package:spindle/page/mobile/library/library_page.dart' as _i12;
+import 'package:spindle/page/desktop/metadata_editor/metadata_editor_page.dart'
+    as _i6;
+import 'package:spindle/page/desktop/player/player_page.dart' as _i7;
+import 'package:spindle/page/desktop/queue/queue_page.dart' as _i8;
+import 'package:spindle/page/desktop/search/search_page.dart' as _i9;
+import 'package:spindle/page/desktop/settings/settings_page.dart' as _i10;
+import 'package:spindle/page/mobile/favorites/favorites_page.dart' as _i11;
+import 'package:spindle/page/mobile/import/import_page.dart' as _i12;
+import 'package:spindle/page/mobile/library/library_page.dart' as _i13;
 import 'package:spindle/page/mobile/lyrics_editor/lyrics_editor_page.dart'
-    as _i13;
-import 'package:spindle/page/mobile/main/main_page.dart' as _i14;
-import 'package:spindle/page/mobile/player/player_page.dart' as _i15;
-import 'package:spindle/page/mobile/queue/queue_page.dart' as _i16;
-import 'package:spindle/page/mobile/search/search_page.dart' as _i17;
-import 'package:spindle/page/mobile/settings/settings_page.dart' as _i18;
+    as _i14;
+import 'package:spindle/page/mobile/main/main_page.dart' as _i15;
+import 'package:spindle/page/mobile/metadata_editor/metadata_editor_page.dart'
+    as _i16;
+import 'package:spindle/page/mobile/player/player_page.dart' as _i17;
+import 'package:spindle/page/mobile/queue/queue_page.dart' as _i18;
+import 'package:spindle/page/mobile/search/search_page.dart' as _i19;
+import 'package:spindle/page/mobile/settings/settings_page.dart' as _i20;
 
 /// generated route for
 /// [_i1.DesktopFavoritesPage]
-class DesktopFavoritesRoute extends _i19.PageRouteInfo<void> {
-  const DesktopFavoritesRoute({List<_i19.PageRouteInfo>? children})
+class DesktopFavoritesRoute extends _i21.PageRouteInfo<void> {
+  const DesktopFavoritesRoute({List<_i21.PageRouteInfo>? children})
     : super(DesktopFavoritesRoute.name, initialChildren: children);
 
   static const String name = 'DesktopFavoritesRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i1.DesktopFavoritesPage();
@@ -51,13 +55,13 @@ class DesktopFavoritesRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i2.DesktopImportPage]
-class DesktopImportRoute extends _i19.PageRouteInfo<void> {
-  const DesktopImportRoute({List<_i19.PageRouteInfo>? children})
+class DesktopImportRoute extends _i21.PageRouteInfo<void> {
+  const DesktopImportRoute({List<_i21.PageRouteInfo>? children})
     : super(DesktopImportRoute.name, initialChildren: children);
 
   static const String name = 'DesktopImportRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i2.DesktopImportPage();
@@ -67,13 +71,13 @@ class DesktopImportRoute extends _i19.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i3.DesktopLibraryPage]
-class DesktopLibraryRoute extends _i19.PageRouteInfo<void> {
-  const DesktopLibraryRoute({List<_i19.PageRouteInfo>? children})
+class DesktopLibraryRoute extends _i21.PageRouteInfo<void> {
+  const DesktopLibraryRoute({List<_i21.PageRouteInfo>? children})
     : super(DesktopLibraryRoute.name, initialChildren: children);
 
   static const String name = 'DesktopLibraryRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i3.DesktopLibraryPage();
@@ -84,11 +88,11 @@ class DesktopLibraryRoute extends _i19.PageRouteInfo<void> {
 /// generated route for
 /// [_i4.DesktopLyricsEditorPage]
 class DesktopLyricsEditorRoute
-    extends _i19.PageRouteInfo<DesktopLyricsEditorRouteArgs> {
+    extends _i21.PageRouteInfo<DesktopLyricsEditorRouteArgs> {
   DesktopLyricsEditorRoute({
-    _i20.Key? key,
-    required _i21.Song song,
-    List<_i19.PageRouteInfo>? children,
+    _i22.Key? key,
+    required _i23.Song song,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
          DesktopLyricsEditorRoute.name,
          args: DesktopLyricsEditorRouteArgs(key: key, song: song),
@@ -97,7 +101,7 @@ class DesktopLyricsEditorRoute
 
   static const String name = 'DesktopLyricsEditorRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<DesktopLyricsEditorRouteArgs>();
@@ -109,9 +113,9 @@ class DesktopLyricsEditorRoute
 class DesktopLyricsEditorRouteArgs {
   const DesktopLyricsEditorRouteArgs({this.key, required this.song});
 
-  final _i20.Key? key;
+  final _i22.Key? key;
 
-  final _i21.Song song;
+  final _i23.Song song;
 
   @override
   String toString() {
@@ -121,13 +125,13 @@ class DesktopLyricsEditorRouteArgs {
 
 /// generated route for
 /// [_i5.DesktopMainPage]
-class DesktopMainRoute extends _i19.PageRouteInfo<void> {
-  const DesktopMainRoute({List<_i19.PageRouteInfo>? children})
+class DesktopMainRoute extends _i21.PageRouteInfo<void> {
+  const DesktopMainRoute({List<_i21.PageRouteInfo>? children})
     : super(DesktopMainRoute.name, initialChildren: children);
 
   static const String name = 'DesktopMainRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       return const _i5.DesktopMainPage();
@@ -136,125 +140,163 @@ class DesktopMainRoute extends _i19.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i6.DesktopPlayerPage]
-class DesktopPlayerRoute extends _i19.PageRouteInfo<void> {
-  const DesktopPlayerRoute({List<_i19.PageRouteInfo>? children})
+/// [_i6.DesktopMetadataEditorPage]
+class DesktopMetadataEditorRoute
+    extends _i21.PageRouteInfo<DesktopMetadataEditorRouteArgs> {
+  DesktopMetadataEditorRoute({
+    _i22.Key? key,
+    required _i23.Song song,
+    List<_i21.PageRouteInfo>? children,
+  }) : super(
+         DesktopMetadataEditorRoute.name,
+         args: DesktopMetadataEditorRouteArgs(key: key, song: song),
+         initialChildren: children,
+       );
+
+  static const String name = 'DesktopMetadataEditorRoute';
+
+  static _i21.PageInfo page = _i21.PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<DesktopMetadataEditorRouteArgs>();
+      return _i6.DesktopMetadataEditorPage(key: args.key, song: args.song);
+    },
+  );
+}
+
+class DesktopMetadataEditorRouteArgs {
+  const DesktopMetadataEditorRouteArgs({this.key, required this.song});
+
+  final _i22.Key? key;
+
+  final _i23.Song song;
+
+  @override
+  String toString() {
+    return 'DesktopMetadataEditorRouteArgs{key: $key, song: $song}';
+  }
+}
+
+/// generated route for
+/// [_i7.DesktopPlayerPage]
+class DesktopPlayerRoute extends _i21.PageRouteInfo<void> {
+  const DesktopPlayerRoute({List<_i21.PageRouteInfo>? children})
     : super(DesktopPlayerRoute.name, initialChildren: children);
 
   static const String name = 'DesktopPlayerRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i6.DesktopPlayerPage();
+      return const _i7.DesktopPlayerPage();
     },
   );
 }
 
 /// generated route for
-/// [_i7.DesktopQueuePage]
-class DesktopQueueRoute extends _i19.PageRouteInfo<void> {
-  const DesktopQueueRoute({List<_i19.PageRouteInfo>? children})
+/// [_i8.DesktopQueuePage]
+class DesktopQueueRoute extends _i21.PageRouteInfo<void> {
+  const DesktopQueueRoute({List<_i21.PageRouteInfo>? children})
     : super(DesktopQueueRoute.name, initialChildren: children);
 
   static const String name = 'DesktopQueueRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i7.DesktopQueuePage();
+      return const _i8.DesktopQueuePage();
     },
   );
 }
 
 /// generated route for
-/// [_i8.DesktopSearchPage]
-class DesktopSearchRoute extends _i19.PageRouteInfo<void> {
-  const DesktopSearchRoute({List<_i19.PageRouteInfo>? children})
+/// [_i9.DesktopSearchPage]
+class DesktopSearchRoute extends _i21.PageRouteInfo<void> {
+  const DesktopSearchRoute({List<_i21.PageRouteInfo>? children})
     : super(DesktopSearchRoute.name, initialChildren: children);
 
   static const String name = 'DesktopSearchRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i8.DesktopSearchPage();
+      return const _i9.DesktopSearchPage();
     },
   );
 }
 
 /// generated route for
-/// [_i9.DesktopSettingsPage]
-class DesktopSettingsRoute extends _i19.PageRouteInfo<void> {
-  const DesktopSettingsRoute({List<_i19.PageRouteInfo>? children})
+/// [_i10.DesktopSettingsPage]
+class DesktopSettingsRoute extends _i21.PageRouteInfo<void> {
+  const DesktopSettingsRoute({List<_i21.PageRouteInfo>? children})
     : super(DesktopSettingsRoute.name, initialChildren: children);
 
   static const String name = 'DesktopSettingsRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i9.DesktopSettingsPage();
+      return const _i10.DesktopSettingsPage();
     },
   );
 }
 
 /// generated route for
-/// [_i10.MobileFavoritesPage]
-class MobileFavoritesRoute extends _i19.PageRouteInfo<void> {
-  const MobileFavoritesRoute({List<_i19.PageRouteInfo>? children})
+/// [_i11.MobileFavoritesPage]
+class MobileFavoritesRoute extends _i21.PageRouteInfo<void> {
+  const MobileFavoritesRoute({List<_i21.PageRouteInfo>? children})
     : super(MobileFavoritesRoute.name, initialChildren: children);
 
   static const String name = 'MobileFavoritesRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i10.MobileFavoritesPage();
+      return const _i11.MobileFavoritesPage();
     },
   );
 }
 
 /// generated route for
-/// [_i11.MobileImportPage]
-class MobileImportRoute extends _i19.PageRouteInfo<void> {
-  const MobileImportRoute({List<_i19.PageRouteInfo>? children})
+/// [_i12.MobileImportPage]
+class MobileImportRoute extends _i21.PageRouteInfo<void> {
+  const MobileImportRoute({List<_i21.PageRouteInfo>? children})
     : super(MobileImportRoute.name, initialChildren: children);
 
   static const String name = 'MobileImportRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i11.MobileImportPage();
+      return const _i12.MobileImportPage();
     },
   );
 }
 
 /// generated route for
-/// [_i12.MobileLibraryPage]
-class MobileLibraryRoute extends _i19.PageRouteInfo<void> {
-  const MobileLibraryRoute({List<_i19.PageRouteInfo>? children})
+/// [_i13.MobileLibraryPage]
+class MobileLibraryRoute extends _i21.PageRouteInfo<void> {
+  const MobileLibraryRoute({List<_i21.PageRouteInfo>? children})
     : super(MobileLibraryRoute.name, initialChildren: children);
 
   static const String name = 'MobileLibraryRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i12.MobileLibraryPage();
+      return const _i13.MobileLibraryPage();
     },
   );
 }
 
 /// generated route for
-/// [_i13.MobileLyricsEditorPage]
+/// [_i14.MobileLyricsEditorPage]
 class MobileLyricsEditorRoute
-    extends _i19.PageRouteInfo<MobileLyricsEditorRouteArgs> {
+    extends _i21.PageRouteInfo<MobileLyricsEditorRouteArgs> {
   MobileLyricsEditorRoute({
-    _i20.Key? key,
-    required _i21.Song song,
-    List<_i19.PageRouteInfo>? children,
+    _i22.Key? key,
+    required _i23.Song song,
+    List<_i21.PageRouteInfo>? children,
   }) : super(
          MobileLyricsEditorRoute.name,
          args: MobileLyricsEditorRouteArgs(key: key, song: song),
@@ -263,11 +305,11 @@ class MobileLyricsEditorRoute
 
   static const String name = 'MobileLyricsEditorRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<MobileLyricsEditorRouteArgs>();
-      return _i13.MobileLyricsEditorPage(key: args.key, song: args.song);
+      return _i14.MobileLyricsEditorPage(key: args.key, song: args.song);
     },
   );
 }
@@ -275,9 +317,9 @@ class MobileLyricsEditorRoute
 class MobileLyricsEditorRouteArgs {
   const MobileLyricsEditorRouteArgs({this.key, required this.song});
 
-  final _i20.Key? key;
+  final _i22.Key? key;
 
-  final _i21.Song song;
+  final _i23.Song song;
 
   @override
   String toString() {
@@ -286,81 +328,119 @@ class MobileLyricsEditorRouteArgs {
 }
 
 /// generated route for
-/// [_i14.MobileMainPage]
-class MobileMainRoute extends _i19.PageRouteInfo<void> {
-  const MobileMainRoute({List<_i19.PageRouteInfo>? children})
+/// [_i15.MobileMainPage]
+class MobileMainRoute extends _i21.PageRouteInfo<void> {
+  const MobileMainRoute({List<_i21.PageRouteInfo>? children})
     : super(MobileMainRoute.name, initialChildren: children);
 
   static const String name = 'MobileMainRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i14.MobileMainPage();
+      return const _i15.MobileMainPage();
     },
   );
 }
 
 /// generated route for
-/// [_i15.MobilePlayerPage]
-class MobilePlayerRoute extends _i19.PageRouteInfo<void> {
-  const MobilePlayerRoute({List<_i19.PageRouteInfo>? children})
+/// [_i16.MobileMetadataEditorPage]
+class MobileMetadataEditorRoute
+    extends _i21.PageRouteInfo<MobileMetadataEditorRouteArgs> {
+  MobileMetadataEditorRoute({
+    _i22.Key? key,
+    required _i23.Song song,
+    List<_i21.PageRouteInfo>? children,
+  }) : super(
+         MobileMetadataEditorRoute.name,
+         args: MobileMetadataEditorRouteArgs(key: key, song: song),
+         initialChildren: children,
+       );
+
+  static const String name = 'MobileMetadataEditorRoute';
+
+  static _i21.PageInfo page = _i21.PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<MobileMetadataEditorRouteArgs>();
+      return _i16.MobileMetadataEditorPage(key: args.key, song: args.song);
+    },
+  );
+}
+
+class MobileMetadataEditorRouteArgs {
+  const MobileMetadataEditorRouteArgs({this.key, required this.song});
+
+  final _i22.Key? key;
+
+  final _i23.Song song;
+
+  @override
+  String toString() {
+    return 'MobileMetadataEditorRouteArgs{key: $key, song: $song}';
+  }
+}
+
+/// generated route for
+/// [_i17.MobilePlayerPage]
+class MobilePlayerRoute extends _i21.PageRouteInfo<void> {
+  const MobilePlayerRoute({List<_i21.PageRouteInfo>? children})
     : super(MobilePlayerRoute.name, initialChildren: children);
 
   static const String name = 'MobilePlayerRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i15.MobilePlayerPage();
+      return const _i17.MobilePlayerPage();
     },
   );
 }
 
 /// generated route for
-/// [_i16.MobileQueuePage]
-class MobileQueueRoute extends _i19.PageRouteInfo<void> {
-  const MobileQueueRoute({List<_i19.PageRouteInfo>? children})
+/// [_i18.MobileQueuePage]
+class MobileQueueRoute extends _i21.PageRouteInfo<void> {
+  const MobileQueueRoute({List<_i21.PageRouteInfo>? children})
     : super(MobileQueueRoute.name, initialChildren: children);
 
   static const String name = 'MobileQueueRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i16.MobileQueuePage();
+      return const _i18.MobileQueuePage();
     },
   );
 }
 
 /// generated route for
-/// [_i17.MobileSearchPage]
-class MobileSearchRoute extends _i19.PageRouteInfo<void> {
-  const MobileSearchRoute({List<_i19.PageRouteInfo>? children})
+/// [_i19.MobileSearchPage]
+class MobileSearchRoute extends _i21.PageRouteInfo<void> {
+  const MobileSearchRoute({List<_i21.PageRouteInfo>? children})
     : super(MobileSearchRoute.name, initialChildren: children);
 
   static const String name = 'MobileSearchRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i17.MobileSearchPage();
+      return const _i19.MobileSearchPage();
     },
   );
 }
 
 /// generated route for
-/// [_i18.MobileSettingsPage]
-class MobileSettingsRoute extends _i19.PageRouteInfo<void> {
-  const MobileSettingsRoute({List<_i19.PageRouteInfo>? children})
+/// [_i20.MobileSettingsPage]
+class MobileSettingsRoute extends _i21.PageRouteInfo<void> {
+  const MobileSettingsRoute({List<_i21.PageRouteInfo>? children})
     : super(MobileSettingsRoute.name, initialChildren: children);
 
   static const String name = 'MobileSettingsRoute';
 
-  static _i19.PageInfo page = _i19.PageInfo(
+  static _i21.PageInfo page = _i21.PageInfo(
     name,
     builder: (data) {
-      return const _i18.MobileSettingsPage();
+      return const _i20.MobileSettingsPage();
     },
   );
 }
