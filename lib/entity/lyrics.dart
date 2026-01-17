@@ -1,15 +1,17 @@
-/// Represents a single line of lyrics with timestamp
+/// Represents a single line of lyrics with optional timestamp
 class LyricLine {
-  final Duration timestamp;
+  final Duration? timestamp;
   final String text;
 
   const LyricLine({
-    required this.timestamp,
+    this.timestamp,
     required this.text,
   });
 
+  bool get hasTimestamp => timestamp != null;
+
   @override
-  String toString() => '[$timestamp] $text';
+  String toString() => timestamp != null ? '[$timestamp] $text' : text;
 }
 
 /// Parsed lyrics data
@@ -18,35 +20,39 @@ class Lyrics {
   final String? artist;
   final String? album;
   final List<LyricLine> lines;
+  final bool hasTiming;
 
   const Lyrics({
     this.title,
     this.artist,
     this.album,
     required this.lines,
+    this.hasTiming = true,
   });
 
   /// Empty lyrics placeholder
-  static const empty = Lyrics(lines: []);
+  static const empty = Lyrics(lines: [], hasTiming: false);
 
   bool get isEmpty => lines.isEmpty;
   bool get isNotEmpty => lines.isNotEmpty;
 
   /// Get current lyric line index based on position
   int getCurrentLineIndex(Duration position) {
-    if (lines.isEmpty) return -1;
+    if (lines.isEmpty || !hasTiming) return -1;
 
     for (int i = lines.length - 1; i >= 0; i--) {
-      if (position >= lines[i].timestamp) {
+      final timestamp = lines[i].timestamp;
+      if (timestamp != null && position >= timestamp) {
         return i;
       }
     }
     return 0;
   }
 
-  /// Parse LRC format lyrics
+  /// Parse LRC format lyrics (supports both timed and plain text)
   static Lyrics parse(String lrcContent) {
-    final lines = <LyricLine>[];
+    final timedLines = <LyricLine>[];
+    final plainLines = <LyricLine>[];
     String? title;
     String? artist;
     String? album;
@@ -89,7 +95,7 @@ class Lyrics {
         final text = match.group(4)?.trim() ?? '';
 
         if (text.isNotEmpty) {
-          lines.add(LyricLine(
+          timedLines.add(LyricLine(
             timestamp: Duration(
               minutes: minutes,
               seconds: seconds,
@@ -98,18 +104,34 @@ class Lyrics {
             text: text,
           ));
         }
+      } else if (!trimmed.startsWith('[')) {
+        // Plain text line (no timestamp, not a tag)
+        plainLines.add(LyricLine(text: trimmed));
       }
     }
 
-    // Sort by timestamp
-    lines.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    // If we have timed lines, use those; otherwise use plain lines
+    if (timedLines.isNotEmpty) {
+      // Sort by timestamp
+      timedLines.sort((a, b) => a.timestamp!.compareTo(b.timestamp!));
+      return Lyrics(
+        title: title,
+        artist: artist,
+        album: album,
+        lines: timedLines,
+        hasTiming: true,
+      );
+    } else if (plainLines.isNotEmpty) {
+      return Lyrics(
+        title: title,
+        artist: artist,
+        album: album,
+        lines: plainLines,
+        hasTiming: false,
+      );
+    }
 
-    return Lyrics(
-      title: title,
-      artist: artist,
-      album: album,
-      lines: lines,
-    );
+    return Lyrics.empty;
   }
 
   static String? _extractTag(String line) {

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:signals/signals.dart';
 import 'package:spindle/database/database.dart';
@@ -42,11 +43,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Spindle',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      routerConfig: router.config(),
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.space): () {
+          AudioService.instance.togglePlayPause();
+        },
+      },
+      child: Focus(
+        autofocus: true,
+        child: MaterialApp.router(
+          title: 'Spindle',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.darkTheme,
+          routerConfig: router.config(),
+        ),
+      ),
     );
   }
 }

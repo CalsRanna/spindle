@@ -145,8 +145,23 @@ class AudioService {
     if (isPlaying.value) {
       await pause();
     } else {
-      await play();
+      // If no song is loaded, play a random song from library
+      if (currentSong.value == null) {
+        await playRandomSong();
+      } else {
+        await play();
+      }
     }
+  }
+
+  /// Play a random song from the library
+  Future<void> playRandomSong() async {
+    final songs = await _songRepository.getAll();
+    if (songs.isEmpty) return;
+
+    final randomIndex = DateTime.now().millisecondsSinceEpoch % songs.length;
+    final randomSong = songs[randomIndex];
+    await playQueue(songs, startIndex: randomIndex);
   }
 
   Future<void> stop() async {

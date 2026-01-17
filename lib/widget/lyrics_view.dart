@@ -37,14 +37,20 @@ class _LyricsViewState extends State<LyricsView> {
 
   void _scrollToCurrentLine() {
     final lyrics = _lyricsService.currentLyrics.value;
-    if (lyrics.isEmpty) return;
+    if (lyrics.isEmpty || !lyrics.hasTiming) return;
 
     final currentIndex = lyrics.getCurrentLineIndex(widget.position);
     if (currentIndex == _lastHighlightedIndex) return;
     _lastHighlightedIndex = currentIndex;
 
     if (currentIndex >= 0 && _scrollController.hasClients) {
-      final targetOffset = (currentIndex * 56.0) - 100;
+      const itemHeight = 56.0;
+      const topPadding = 100.0;
+      final viewportHeight = _scrollController.position.viewportDimension;
+      // Calculate position to center the current line in viewport
+      final itemCenterPosition =
+          topPadding + (currentIndex * itemHeight) + (itemHeight / 2);
+      final targetOffset = itemCenterPosition - (viewportHeight / 2);
       _scrollController.animateTo(
         targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
         duration: const Duration(milliseconds: 300),
@@ -61,6 +67,12 @@ class _LyricsViewState extends State<LyricsView> {
       return const _EmptyLyricsView();
     }
 
+    // Static lyrics (no timing)
+    if (!lyrics.hasTiming) {
+      return _StaticLyricsView(lyrics: lyrics);
+    }
+
+    // Timed lyrics with highlighting
     final currentIndex = lyrics.getCurrentLineIndex(widget.position);
 
     return ListView.builder(
@@ -89,6 +101,36 @@ class _LyricsViewState extends State<LyricsView> {
             child: Text(
               line.text,
               textAlign: TextAlign.center,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Static lyrics view for lyrics without timing information
+class _StaticLyricsView extends StatelessWidget {
+  final dynamic lyrics;
+
+  const _StaticLyricsView({required this.lyrics});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+      itemCount: lyrics.lines.length,
+      itemBuilder: (context, index) {
+        final line = lyrics.lines[index];
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            line.text,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 16,
+              color: AppTheme.textPrimary,
+              height: 1.6,
             ),
           ),
         );

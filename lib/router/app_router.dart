@@ -18,7 +18,10 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: DesktopSettingsRoute.page),
       ],
     ),
-    AutoRoute(page: DesktopPlayerRoute.page),
+    CustomRoute(
+      page: DesktopPlayerRoute.page,
+      transitionsBuilder: TransitionsBuilders.slideBottom,
+    ),
     AutoRoute(page: DesktopQueueRoute.page),
     AutoRoute(page: DesktopImportRoute.page),
     AutoRoute(page: DesktopLyricsEditorRoute.page),
@@ -35,7 +38,10 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: MobileSettingsRoute.page),
       ],
     ),
-    AutoRoute(page: MobilePlayerRoute.page),
+    CustomRoute(
+      page: MobilePlayerRoute.page,
+      transitionsBuilder: TransitionsBuilders.slideBottom,
+    ),
     AutoRoute(page: MobileQueueRoute.page),
     AutoRoute(page: MobileImportRoute.page),
     AutoRoute(page: MobileLyricsEditorRoute.page),
