@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:spindle/database/database.dart';
 import 'package:spindle/entity/song.dart';
+import 'package:spindle/service/file_service.dart';
 
 class SongRepository {
   final _db = Database.instance;
@@ -23,11 +24,6 @@ class SongRepository {
     return validSongs;
   }
 
-  /// Supported audio extensions
-  static const _audioExtensions = [
-    '.mp3', '.flac', '.wav', '.aac', '.m4a', '.ogg', '.wma', '.aiff', '.alac'
-  ];
-
   /// Remove invalid songs:
   /// 1. Songs whose files no longer exist
   /// 2. Non-audio files (like .lrc lyrics files)
@@ -42,8 +38,7 @@ class SongRepository {
         shouldDelete = true;
       } else {
         // Check if it's an audio file (not lyrics or other)
-        final ext = '.${song.filePath.toLowerCase().split('.').last}';
-        if (!_audioExtensions.contains(ext)) {
+        if (!FileService.isAudioFile(song.filePath)) {
           shouldDelete = true;
         }
       }

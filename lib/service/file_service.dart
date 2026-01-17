@@ -18,7 +18,7 @@ class FileService {
   final _bookmarkService = BookmarkService.instance;
   final _logger = LoggerUtil.instance;
 
-  static const _supportedAudioExtensions = [
+  static const supportedAudioExtensions = [
     '.mp3',
     '.flac',
     '.wav',
@@ -33,11 +33,23 @@ class FileService {
   static const _supportedLyricsExtensions = ['.lrc'];
 
   static List<String> get _supportedExtensions =>
-      [..._supportedAudioExtensions, ..._supportedLyricsExtensions];
+      [...supportedAudioExtensions, ..._supportedLyricsExtensions];
 
   static const _allowedExtensions = [
     'mp3', 'flac', 'wav', 'aac', 'm4a', 'ogg', 'wma', 'aiff', 'alac', 'lrc'
   ];
+
+  /// Check if file is an audio file
+  static bool isAudioFile(String filePath) {
+    final ext = '.${filePath.toLowerCase().split('.').last}';
+    return supportedAudioExtensions.contains(ext);
+  }
+
+  /// Check if file is a lyrics file
+  static bool isLyricsFile(String filePath) {
+    final ext = '.${filePath.toLowerCase().split('.').last}';
+    return _supportedLyricsExtensions.contains(ext);
+  }
 
   Future<String?> pickFolder() async {
     final result = await FilePicker.platform.getDirectoryPath();
@@ -68,18 +80,6 @@ class FileService {
 
     _logger.i('Picked ${paths.length} files');
     return paths;
-  }
-
-  /// Check if file is a lyrics file
-  bool _isLyricsFile(String filePath) {
-    final ext = '.${filePath.toLowerCase().split('.').last}';
-    return _supportedLyricsExtensions.contains(ext);
-  }
-
-  /// Check if file is an audio file
-  bool _isAudioFile(String filePath) {
-    final ext = '.${filePath.toLowerCase().split('.').last}';
-    return _supportedAudioExtensions.contains(ext);
   }
 
   /// Get the music directory inside app documents
@@ -155,7 +155,7 @@ class FileService {
         }
 
         // Handle lyrics files - just copy, don't add to database
-        if (_isLyricsFile(permanentPath)) {
+        if (isLyricsFile(permanentPath)) {
           _logger.i('Imported lyrics: $permanentPath');
           lyricsCount++;
           continue;
@@ -263,7 +263,7 @@ class FileService {
           final extension = entity.path.toLowerCase().split('.').last;
           _logger.d('File extension: .$extension');
           // Only scan audio files, not lyrics
-          if (_supportedAudioExtensions.contains('.$extension')) {
+          if (supportedAudioExtensions.contains('.$extension')) {
             _logger.i('Found audio file: ${entity.path}');
             audioFiles.add(entity);
           }
