@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:path/path.dart' as p;
 import 'package:signals/signals_flutter.dart';
 import 'package:spindle/page/desktop/import/import_view_model.dart';
 import 'package:spindle/page/desktop/library/library_view_model.dart';
@@ -24,6 +27,7 @@ class _MobileImportPageState extends State<MobileImportPage> {
     super.initState();
     _viewModel = GetIt.instance.get<ImportViewModel>();
     _libraryViewModel = GetIt.instance.get<LibraryViewModel>();
+    _viewModel.loadImportedFiles();
   }
 
   Future<void> _pickAndImportFiles() async {
@@ -33,169 +37,261 @@ class _MobileImportPageState extends State<MobileImportPage> {
     }
   }
 
+  Future<void> _deleteFile(String filePath, String fileName) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.cardBackground,
+        title: const Text('Delete File'),
+        content: Text('Are you sure you want to delete "$fileName"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _viewModel.deleteFile(filePath);
+      await _libraryViewModel.refresh();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Deleted: $fileName'),
+            backgroundColor: AppTheme.accentColor,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Watch((context) {
+      final audioFiles = _viewModel.audioFiles.value;
+      final lyricsFiles = _viewModel.lyricsFiles.value;
       final isScanning = _viewModel.isScanning.value;
-      final scanProgress = _viewModel.scanProgress.value;
 
       return Scaffold(
         appBar: AppBar(
-          title: const Text('IMPORT'),
+          title: const Text('FILES'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => context.router.maybePop(),
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.wifi),
+              tooltip: 'WiFi Transfer',
+              onPressed: isScanning
+                  ? null
+                  : () => context.router.push(const MobileWifiTransferRoute()),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: 'Select Files',
+              onPressed: isScanning ? null : _pickAndImportFiles,
+            ),
+          ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              // Select Files option
-              _buildCard(
-                icon: Icons.folder_open,
-                iconColor: AppTheme.accentColor,
-                title: 'Select Files',
-                subtitle: 'Pick music and lyrics from Files app',
-                trailing: const Icon(Icons.add, color: AppTheme.accentColor),
-                onTap: isScanning ? null : _pickAndImportFiles,
-              ),
-              const SizedBox(height: 16),
-
-              // WiFi Transfer option
-              _buildCard(
-                icon: Icons.wifi,
-                iconColor: Colors.blue,
-                title: 'WiFi Transfer',
-                subtitle: 'Receive files from your computer',
-                trailing:
-                    const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
-                onTap: isScanning
-                    ? null
-                    : () => context.router.push(const MobileWifiTransferRoute()),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Progress indicator
-              if (isScanning) ...[
-                const LinearProgressIndicator(
-                  color: AppTheme.accentColor,
-                  backgroundColor: AppTheme.dividerColor,
+        body: isScanning
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: AppTheme.accentColor),
+                    SizedBox(height: 16),
+                    Text('Importing...', style: TextStyle(color: AppTheme.textSecondary)),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  scanProgress,
-                  style: const TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 13,
-                  ),
-                ),
-              ] else if (scanProgress.isNotEmpty) ...[
-                Text(
-                  scanProgress,
-                  style: const TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-
-              const Spacer(),
-
-              // Help card
-              Card(
-                color: AppTheme.cardBackground.withValues(alpha: 0.5),
-                child: const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.info_outline,
-                              size: 18, color: AppTheme.accentColor),
-                          SizedBox(width: 8),
-                          Text(
-                            'Supported formats',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12),
-                      Text(
-                        'Audio: MP3, FLAC, WAV, AAC, M4A, OGG, WMA, AIFF, ALAC\n'
-                        'Lyrics: LRC',
-                        style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 13,
-                          height: 1.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 80),
-            ],
-          ),
-        ),
+              )
+            : audioFiles.isEmpty && lyricsFiles.isEmpty
+                ? _buildEmptyState()
+                : _buildFileList(audioFiles, lyricsFiles),
       );
     });
   }
 
-  Widget _buildCard({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String subtitle,
-    required Widget trailing,
-    required VoidCallback? onTap,
-  }) {
-    return Card(
-      color: AppTheme.cardBackground,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.folder_open, size: 64, color: AppTheme.textSecondary),
+          const SizedBox(height: 16),
+          const Text(
+            'No files imported',
+            style: TextStyle(fontSize: 18, color: AppTheme.textSecondary),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Tap + to select files or use WiFi transfer',
+            style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: iconColor == AppTheme.accentColor
-                      ? AppTheme.accentColor.withValues(alpha: 0.2)
-                      : iconColor.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: iconColor, size: 28),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                          color: AppTheme.textSecondary, fontSize: 13),
-                    ),
-                  ],
+              ElevatedButton.icon(
+                onPressed: _pickAndImportFiles,
+                icon: const Icon(Icons.add),
+                label: const Text('Select Files'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.accentColor,
+                  foregroundColor: Colors.white,
                 ),
               ),
-              trailing,
+              const SizedBox(width: 12),
+              OutlinedButton.icon(
+                onPressed: () => context.router.push(const MobileWifiTransferRoute()),
+                icon: const Icon(Icons.wifi),
+                label: const Text('WiFi'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.accentColor,
+                  side: const BorderSide(color: AppTheme.accentColor),
+                ),
+              ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFileList(List<File> audioFiles, List<File> lyricsFiles) {
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      children: [
+        if (audioFiles.isNotEmpty) ...[
+          _buildSectionHeader('Songs', audioFiles.length),
+          ...audioFiles.map((file) => _buildFileItem(file, Icons.music_note)),
+        ],
+        if (lyricsFiles.isNotEmpty) ...[
+          if (audioFiles.isNotEmpty) const SizedBox(height: 16),
+          _buildSectionHeader('Lyrics', lyricsFiles.length),
+          ...lyricsFiles.map((file) => _buildFileItem(file, Icons.lyrics)),
+        ],
+        const SizedBox(height: 80),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(String title, int count) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Text(
+            title.toUpperCase(),
+            style: const TextStyle(
+              color: AppTheme.textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppTheme.accentColor.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              '$count',
+              style: const TextStyle(
+                color: AppTheme.accentColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFileItem(File file, IconData icon) {
+    final fileName = p.basename(file.path);
+    final fileSize = _formatFileSize(file.lengthSync());
+
+    return Dismissible(
+      key: Key(file.path),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        color: Colors.red,
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      confirmDismiss: (direction) async {
+        return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: AppTheme.cardBackground,
+            title: const Text('Delete File'),
+            content: Text('Are you sure you want to delete "$fileName"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          ),
+        );
+      },
+      onDismissed: (direction) async {
+        await _viewModel.deleteFile(file.path);
+        await _libraryViewModel.refresh();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Deleted: $fileName'),
+              backgroundColor: AppTheme.accentColor,
+            ),
+          );
+        }
+      },
+      child: ListTile(
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppTheme.accentColor.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: AppTheme.accentColor, size: 20),
+        ),
+        title: Text(
+          fileName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          fileSize,
+          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete_outline, color: AppTheme.textSecondary),
+          onPressed: () => _deleteFile(file.path, fileName),
         ),
       ),
     );
+  }
+
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 }

@@ -366,4 +366,50 @@ class FileService {
     final extension = filePath.toLowerCase().split('.').last;
     return _supportedExtensions.contains('.$extension');
   }
+
+  /// Get all imported files in the Music directory
+  /// Returns a record of (audioFiles, lyricsFiles)
+  Future<({List<File> audioFiles, List<File> lyricsFiles})>
+      getImportedFiles() async {
+    final musicDir = await _getMusicDirectory();
+    final audioFiles = <File>[];
+    final lyricsFiles = <File>[];
+
+    if (!await musicDir.exists()) {
+      return (audioFiles: audioFiles, lyricsFiles: lyricsFiles);
+    }
+
+    await for (final entity in musicDir.list()) {
+      if (entity is File) {
+        if (isAudioFile(entity.path)) {
+          audioFiles.add(entity);
+        } else if (isLyricsFile(entity.path)) {
+          lyricsFiles.add(entity);
+        }
+      }
+    }
+
+    // Sort by name
+    audioFiles.sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
+    lyricsFiles
+        .sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
+
+    return (audioFiles: audioFiles, lyricsFiles: lyricsFiles);
+  }
+
+  /// Delete a file from the Music directory and remove from database if it's a song
+  Future<void> deleteImportedFile(String filePath) async {
+    final file = File(filePath);
+    if (await file.exists()) {
+      // If it's an audio file, also delete from database
+      if (isAudioFile(filePath)) {
+        final song = await _songRepository.getByFilePath(filePath);
+        if (song != null && song.id != null) {
+          await _songRepository.delete(song.id!);
+        }
+      }
+      await file.delete();
+      _logger.i('Deleted file: $filePath');
+    }
+  }
 }

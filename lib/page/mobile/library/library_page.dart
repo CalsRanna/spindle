@@ -60,10 +60,6 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
               onPressed: () => context.router.push(const MobileSearchRoute()),
             ),
             IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () => context.router.push(const MobileImportRoute()),
-            ),
-            IconButton(
               icon: const Icon(Icons.settings),
               onPressed: () => context.router.push(const MobileSettingsRoute()),
             ),
@@ -101,13 +97,16 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                               height: 164,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
                                 itemCount: recentlyPlayed.length,
                                 itemBuilder: (context, index) {
                                   final song = recentlyPlayed[index];
                                   return _RecentlyPlayedCard(
                                     song: song,
-                                    onTap: () => _viewModel.playRecentSong(song),
+                                    onTap: () =>
+                                        _viewModel.playRecentSong(song),
                                   );
                                 },
                               ),
@@ -124,9 +123,12 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
                                     'Favorites',
@@ -136,10 +138,14 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                                     ),
                                   ),
                                   TextButton(
-                                    onPressed: () => context.router.push(const MobileFavoritesRoute()),
+                                    onPressed: () => context.router.push(
+                                      const MobileFavoritesRoute(),
+                                    ),
                                     child: const Text(
                                       'SEE ALL',
-                                      style: TextStyle(color: AppTheme.accentColor),
+                                      style: TextStyle(
+                                        color: AppTheme.accentColor,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -149,13 +155,18 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                               height: 164,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
-                                itemCount: favorites.length > 10 ? 10 : favorites.length,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                itemCount: favorites.length > 10
+                                    ? 10
+                                    : favorites.length,
                                 itemBuilder: (context, index) {
                                   final song = favorites[index];
                                   return _FavoriteCard(
                                     song: song,
-                                    onTap: () => _favoritesViewModel.playSong(song),
+                                    onTap: () =>
+                                        _favoritesViewModel.playSong(song),
                                   );
                                 },
                               ),
@@ -214,8 +225,9 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                               ),
                               const SizedBox(height: 8),
                               TextButton(
-                                onPressed: () =>
-                                    context.router.push(const MobileImportRoute()),
+                                onPressed: () => context.router.push(
+                                  const MobileImportRoute(),
+                                ),
                                 child: const Text('Import Music'),
                               ),
                             ],
@@ -268,7 +280,9 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                   color: song.isFavorite ? AppTheme.accentColor : null,
                 ),
                 title: Text(
-                  song.isFavorite ? 'Remove from Favorites' : 'Add to Favorites',
+                  song.isFavorite
+                      ? 'Remove from Favorites'
+                      : 'Add to Favorites',
                 ),
                 onTap: () async {
                   Navigator.pop(context);
@@ -286,7 +300,10 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
               ),
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: Colors.red),
-                title: const Text('Delete', style: TextStyle(color: Colors.red)),
+                title: const Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.red),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _showDeleteConfirmation(context, song);
@@ -317,11 +334,15 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                   const SizedBox(height: 16),
                   CheckboxListTile(
                     value: deleteFile,
-                    onChanged: (value) => setState(() => deleteFile = value ?? false),
+                    onChanged: (value) =>
+                        setState(() => deleteFile = value ?? false),
                     title: const Text('Also delete the file'),
                     subtitle: const Text(
                       'This will permanently remove the file from your device',
-                      style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                     controlAffinity: ListTileControlAffinity.leading,
                     contentPadding: EdgeInsets.zero,
@@ -341,15 +362,20 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(deleteFile
-                              ? 'Song and file deleted'
-                              : 'Song removed from library'),
+                          content: Text(
+                            deleteFile
+                                ? 'Song and file deleted'
+                                : 'Song removed from library',
+                          ),
                           backgroundColor: AppTheme.accentColor,
                         ),
                       );
                     }
                   },
-                  child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                  child: const Text(
+                    'Delete',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ),
               ],
             );

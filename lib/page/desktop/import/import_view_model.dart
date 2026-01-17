@@ -12,6 +12,8 @@ class ImportViewModel {
   final _folderRepository = FolderRepository();
 
   final folders = Signal<List<FolderPath>>([]);
+  final audioFiles = Signal<List<File>>([]);
+  final lyricsFiles = Signal<List<File>>([]);
   final isScanning = Signal<bool>(false);
   final scanProgress = Signal<String>('');
 
@@ -20,10 +22,24 @@ class ImportViewModel {
 
   ImportViewModel() {
     loadFolders();
+    loadImportedFiles();
   }
 
   Future<void> loadFolders() async {
     folders.value = await _folderRepository.getAll();
+  }
+
+  /// Load imported files from Music directory
+  Future<void> loadImportedFiles() async {
+    final result = await _fileService.getImportedFiles();
+    audioFiles.value = result.audioFiles;
+    lyricsFiles.value = result.lyricsFiles;
+  }
+
+  /// Delete an imported file
+  Future<void> deleteFile(String filePath) async {
+    await _fileService.deleteImportedFile(filePath);
+    await loadImportedFiles();
   }
 
   /// Pick and import audio/lyrics files directly (works on iOS)
@@ -61,6 +77,7 @@ class ImportViewModel {
       return (audioCount: 0, lyricsCount: 0);
     } finally {
       isScanning.value = false;
+      await loadImportedFiles();
     }
   }
 
