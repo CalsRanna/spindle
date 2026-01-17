@@ -219,10 +219,4 @@ class ImportViewModel {
     await _fileService.removeFolder(id);
     await loadFolders();
   }
-
-  void dispose() {
-    folders.dispose();
-    isScanning.dispose();
-    scanProgress.dispose();
-  }
 }

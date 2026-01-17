@@ -72,113 +72,115 @@ class _MobileMetadataEditorPageState extends State<MobileMetadataEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isSaving = _viewModel.isSaving.watch(context);
-    final hasChanges = _viewModel.hasChanges.watch(context);
+    return Watch((context) {
+      final isSaving = _viewModel.isSaving.value;
+      final hasChanges = _viewModel.hasChanges.value;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('EDIT METADATA'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => context.router.maybePop(),
-        ),
-        actions: [
-          if (isSaving)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppTheme.accentColor,
-                ),
-              ),
-            )
-          else
-            TextButton(
-              onPressed: hasChanges ? _save : null,
-              child: Text(
-                'SAVE',
-                style: TextStyle(
-                  color: hasChanges ? AppTheme.accentColor : AppTheme.textSecondary,
-                ),
-              ),
-            ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Album art
-            AlbumCover(
-              imagePath: widget.song.albumArtPath,
-              size: 150,
-              borderRadius: 12,
-            ),
-            const SizedBox(height: 24),
-
-            // Form fields
-            _buildTextField(
-              label: 'Title',
-              controller: _titleController,
-              onChanged: _viewModel.updateTitle,
-              icon: Icons.music_note,
-            ),
-            const SizedBox(height: 16),
-            _buildTextField(
-              label: 'Artist',
-              controller: _artistController,
-              onChanged: _viewModel.updateArtist,
-              icon: Icons.person,
-            ),
-            const SizedBox(height: 16),
-            _buildTextField(
-              label: 'Album',
-              controller: _albumController,
-              onChanged: _viewModel.updateAlbum,
-              icon: Icons.album,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Track #',
-                    controller: _trackNumberController,
-                    onChanged: _viewModel.updateTrackNumber,
-                    icon: Icons.tag,
-                    keyboardType: TextInputType.number,
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('EDIT METADATA'),
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => context.router.maybePop(),
+          ),
+          actions: [
+            if (isSaving)
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppTheme.accentColor,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildTextField(
-                    label: 'Year',
-                    controller: _yearController,
-                    onChanged: _viewModel.updateYear,
-                    icon: Icons.calendar_today,
-                    keyboardType: TextInputType.number,
+              )
+            else
+              TextButton(
+                onPressed: hasChanges ? _save : null,
+                child: Text(
+                  'SAVE',
+                  style: TextStyle(
+                    color: hasChanges ? AppTheme.accentColor : AppTheme.textSecondary,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _buildTextField(
-              label: 'Genre',
-              controller: _genreController,
-              onChanged: _viewModel.updateGenre,
-              icon: Icons.category,
-            ),
-            const SizedBox(height: 24),
-
-            // File info
-            _buildFileInfo(),
+              ),
           ],
         ),
-      ),
-    );
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              // Album art
+              AlbumCover(
+                imagePath: widget.song.albumArtPath,
+                size: 150,
+                borderRadius: 12,
+              ),
+              const SizedBox(height: 24),
+
+              // Form fields
+              _buildTextField(
+                label: 'Title',
+                controller: _titleController,
+                onChanged: _viewModel.updateTitle,
+                icon: Icons.music_note,
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                label: 'Artist',
+                controller: _artistController,
+                onChanged: _viewModel.updateArtist,
+                icon: Icons.person,
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                label: 'Album',
+                controller: _albumController,
+                onChanged: _viewModel.updateAlbum,
+                icon: Icons.album,
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildTextField(
+                      label: 'Track #',
+                      controller: _trackNumberController,
+                      onChanged: _viewModel.updateTrackNumber,
+                      icon: Icons.tag,
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildTextField(
+                      label: 'Year',
+                      controller: _yearController,
+                      onChanged: _viewModel.updateYear,
+                      icon: Icons.calendar_today,
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildTextField(
+                label: 'Genre',
+                controller: _genreController,
+                onChanged: _viewModel.updateGenre,
+                icon: Icons.category,
+              ),
+              const SizedBox(height: 24),
+
+              // File info
+              _buildFileInfo(),
+            ],
+          ),
+        ),
+      );
+    });
   }
 
   Widget _buildTextField({

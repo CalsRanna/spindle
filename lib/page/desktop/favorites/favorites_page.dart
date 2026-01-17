@@ -4,7 +4,6 @@ import 'package:get_it/get_it.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:spindle/entity/song.dart';
 import 'package:spindle/page/desktop/favorites/favorites_view_model.dart';
-import 'package:spindle/service/audio_service.dart';
 import 'package:spindle/util/app_theme.dart';
 import 'package:spindle/widget/song_tile.dart';
 
@@ -28,74 +27,76 @@ class _DesktopFavoritesPageState extends State<DesktopFavoritesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = _viewModel.isLoading.watch(context);
-    final songs = _viewModel.songs.watch(context);
-    final currentSong = AudioService.instance.currentSong.watch(context);
+    return Watch((context) {
+      final isLoading = _viewModel.isLoading.value;
+      final songs = _viewModel.songs.value;
+      final currentSong = _viewModel.currentSong.value;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('FAVORITES'),
-        actions: [
-          if (songs.isNotEmpty)
-            TextButton.icon(
-              onPressed: _viewModel.playAll,
-              icon: const Icon(Icons.play_arrow, size: 20),
-              label: const Text('PLAY ALL'),
-              style: TextButton.styleFrom(foregroundColor: AppTheme.accentColor),
-            ),
-        ],
-      ),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppTheme.accentColor),
-            )
-          : songs.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.favorite_border,
-                        size: 64,
-                        color: AppTheme.textSecondary.withValues(alpha: 0.5),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'No favorites yet',
-                        style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 18,
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('FAVORITES'),
+          actions: [
+            if (songs.isNotEmpty)
+              TextButton.icon(
+                onPressed: _viewModel.playAll,
+                icon: const Icon(Icons.play_arrow, size: 20),
+                label: const Text('PLAY ALL'),
+                style: TextButton.styleFrom(foregroundColor: AppTheme.accentColor),
+              ),
+          ],
+        ),
+        body: isLoading
+            ? const Center(
+                child: CircularProgressIndicator(color: AppTheme.accentColor),
+              )
+            : songs.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.favorite_border,
+                          size: 64,
+                          color: AppTheme.textSecondary.withValues(alpha: 0.5),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Tap the heart icon on a song to add it here',
-                        style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 14,
+                        const SizedBox(height: 16),
+                        const Text(
+                          'No favorites yet',
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 18,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Tap the heart icon on a song to add it here',
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _viewModel.loadFavorites,
+                    color: AppTheme.accentColor,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 80),
+                      itemCount: songs.length,
+                      itemBuilder: (context, index) {
+                        final song = songs[index];
+                        return SongTile(
+                          song: song,
+                          isPlaying: currentSong?.id == song.id,
+                          onTap: () => _viewModel.playSong(song),
+                          onMoreTap: () => _showSongOptions(context, song),
+                        );
+                      },
+                    ),
                   ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _viewModel.loadFavorites,
-                  color: AppTheme.accentColor,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 80),
-                    itemCount: songs.length,
-                    itemBuilder: (context, index) {
-                      final song = songs[index];
-                      return SongTile(
-                        song: song,
-                        isPlaying: currentSong?.id == song.id,
-                        onTap: () => _viewModel.playSong(song),
-                        onMoreTap: () => _showSongOptions(context, song),
-                      );
-                    },
-                  ),
-                ),
-    );
+      );
+    });
   }
 
   void _showSongOptions(BuildContext context, Song song) {
@@ -114,7 +115,7 @@ class _DesktopFavoritesPageState extends State<DesktopFavoritesPage> {
                 leading: const Icon(Icons.playlist_add),
                 title: const Text('Add to Queue'),
                 onTap: () {
-                  AudioService.instance.addToQueue(song);
+                  _viewModel.addToQueue(song);
                   Navigator.pop(context);
                 },
               ),

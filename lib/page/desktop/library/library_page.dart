@@ -5,7 +5,6 @@ import 'package:signals/signals_flutter.dart';
 import 'package:spindle/entity/song.dart';
 import 'package:spindle/page/desktop/library/library_view_model.dart';
 import 'package:spindle/router/app_router.gr.dart';
-import 'package:spindle/service/audio_service.dart';
 import 'package:spindle/util/app_theme.dart';
 import 'package:spindle/widget/album_cover.dart';
 import 'package:spindle/widget/song_tile.dart';
@@ -42,152 +41,154 @@ class _DesktopLibraryPageState extends State<DesktopLibraryPage>
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = _viewModel.isLoading.watch(context);
-    final songs = _viewModel.songs.watch(context);
-    final recentlyPlayed = _viewModel.recentlyPlayed.watch(context);
-    final currentSong = AudioService.instance.currentSong.watch(context);
+    return Watch((context) {
+      final isLoading = _viewModel.isLoading.value;
+      final songs = _viewModel.songs.value;
+      final recentlyPlayed = _viewModel.recentlyPlayed.value;
+      final currentSong = _viewModel.currentSong.value;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('LIBRARY'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () => context.router.push(const DesktopSearchRoute()),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => context.router.push(const DesktopImportRoute()),
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => context.router.push(const DesktopSettingsRoute()),
-          ),
-        ],
-      ),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppTheme.accentColor),
-            )
-          : RefreshIndicator(
-              onRefresh: _viewModel.loadSongs,
-              color: AppTheme.accentColor,
-              child: CustomScrollView(
-                slivers: [
-                  // Recently Played Section
-                  if (recentlyPlayed.isNotEmpty)
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('LIBRARY'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () => context.router.push(const DesktopSearchRoute()),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () => context.router.push(const DesktopImportRoute()),
+            ),
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () => context.router.push(const DesktopSettingsRoute()),
+            ),
+          ],
+        ),
+        body: isLoading
+            ? const Center(
+                child: CircularProgressIndicator(color: AppTheme.accentColor),
+              )
+            : RefreshIndicator(
+                onRefresh: _viewModel.loadSongs,
+                color: AppTheme.accentColor,
+                child: CustomScrollView(
+                  slivers: [
+                    // Recently Played Section
+                    if (recentlyPlayed.isNotEmpty)
+                      SliverToBoxAdapter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Text(
+                                'Recently Played',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 164,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                itemCount: recentlyPlayed.length,
+                                itemBuilder: (context, index) {
+                                  final song = recentlyPlayed[index];
+                                  return _RecentlyPlayedCard(
+                                    song: song,
+                                    onTap: () => _viewModel.playRecentSong(song),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                        ),
+                      ),
+
+                    // All Songs Header
                     SliverToBoxAdapter(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Text(
-                              'Recently Played',
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'All Songs',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 164,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
+                            TextButton.icon(
+                              onPressed: _viewModel.playAll,
+                              icon: const Icon(Icons.play_arrow, size: 20),
+                              label: const Text('PLAY ALL'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppTheme.accentColor,
                               ),
-                              itemCount: recentlyPlayed.length,
-                              itemBuilder: (context, index) {
-                                final song = recentlyPlayed[index];
-                                return _RecentlyPlayedCard(
-                                  song: song,
-                                  onTap: () => _viewModel.playRecentSong(song),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                      ),
-                    ),
-
-                  // All Songs Header
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'All Songs',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextButton.icon(
-                            onPressed: _viewModel.playAll,
-                            icon: const Icon(Icons.play_arrow, size: 20),
-                            label: const Text('PLAY ALL'),
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppTheme.accentColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Songs List
-                  if (songs.isEmpty)
-                    SliverFillRemaining(
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.music_off,
-                              size: 64,
-                              color: AppTheme.textSecondary,
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'No songs yet',
-                              style: TextStyle(
-                                color: AppTheme.textSecondary,
-                                fontSize: 18,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextButton(
-                              onPressed: () =>
-                                  context.router.push(const DesktopImportRoute()),
-                              child: const Text('Import Music'),
                             ),
                           ],
                         ),
                       ),
-                    )
-                  else
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final song = songs[index];
-                        return SongTile(
-                          song: song,
-                          isPlaying: currentSong?.id == song.id,
-                          onTap: () => _viewModel.playSong(song),
-                          onMoreTap: () => _showSongOptions(context, song),
-                        );
-                      }, childCount: songs.length),
                     ),
 
-                  // Bottom padding for mini player
-                  const SliverToBoxAdapter(child: SizedBox(height: 80)),
-                ],
+                    // Songs List
+                    if (songs.isEmpty)
+                      SliverFillRemaining(
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.music_off,
+                                size: 64,
+                                color: AppTheme.textSecondary,
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'No songs yet',
+                                style: TextStyle(
+                                  color: AppTheme.textSecondary,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              TextButton(
+                                onPressed: () =>
+                                    context.router.push(const DesktopImportRoute()),
+                                child: const Text('Import Music'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final song = songs[index];
+                          return SongTile(
+                            song: song,
+                            isPlaying: currentSong?.id == song.id,
+                            onTap: () => _viewModel.playSong(song),
+                            onMoreTap: () => _showSongOptions(context, song),
+                          );
+                        }, childCount: songs.length),
+                      ),
+
+                    // Bottom padding for mini player
+                    const SliverToBoxAdapter(child: SizedBox(height: 80)),
+                  ],
+                ),
               ),
-            ),
-    );
+      );
+    });
   }
 
   void _showSongOptions(BuildContext context, Song song) {
@@ -206,7 +207,7 @@ class _DesktopLibraryPageState extends State<DesktopLibraryPage>
                 leading: const Icon(Icons.playlist_add),
                 title: const Text('Add to Queue'),
                 onTap: () {
-                  AudioService.instance.addToQueue(song);
+                  _viewModel.addToQueue(song);
                   Navigator.pop(context);
                 },
               ),

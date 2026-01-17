@@ -1,11 +1,12 @@
+import 'package:get_it/get_it.dart';
 import 'package:signals/signals.dart';
 import 'package:spindle/entity/song.dart';
+import 'package:spindle/page/desktop/player/player_view_model.dart';
 import 'package:spindle/repository/song_repository.dart';
-import 'package:spindle/service/audio_service.dart';
 
 class LibraryViewModel {
   final _songRepository = SongRepository();
-  final _audioService = AudioService.instance;
+  final _playerViewModel = GetIt.instance.get<PlayerViewModel>();
 
   final songs = Signal<List<Song>>([]);
   final recentlyPlayed = Signal<List<Song>>([]);
@@ -41,15 +42,15 @@ class LibraryViewModel {
 
   void playAll() {
     if (songs.value.isEmpty) return;
-    _audioService.playQueue(songs.value);
+    _playerViewModel.playQueue(songs.value);
   }
 
   void playSong(Song song) {
     final index = songs.value.indexOf(song);
     if (index >= 0) {
-      _audioService.playQueue(songs.value, startIndex: index);
+      _playerViewModel.playQueue(songs.value, startIndex: index);
     } else {
-      _audioService.playSong(song);
+      _playerViewModel.playSong(song);
     }
   }
 
@@ -57,23 +58,15 @@ class LibraryViewModel {
     final allSongs = songs.value;
     final index = allSongs.indexWhere((s) => s.id == song.id);
     if (index >= 0) {
-      _audioService.playQueue(allSongs, startIndex: index);
+      _playerViewModel.playQueue(allSongs, startIndex: index);
     } else {
-      _audioService.playSong(song);
+      _playerViewModel.playSong(song);
     }
   }
 
-  bool isSongPlaying(Song song) {
-    final current = _audioService.currentSong.value;
-    return current?.id == song.id && _audioService.isPlaying.value;
+  void addToQueue(Song song) {
+    _playerViewModel.addToQueue(song);
   }
 
-  Song? get currentPlayingSong => _audioService.currentSong.value;
-
-  void dispose() {
-    songs.dispose();
-    recentlyPlayed.dispose();
-    isLoading.dispose();
-    searchQuery.dispose();
-  }
+  Signal<Song?> get currentSong => _playerViewModel.currentSong;
 }

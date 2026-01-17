@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get_it/get_it.dart';
 import 'package:metadata_god/metadata_god.dart';
 import 'package:signals/signals.dart';
 import 'package:spindle/database/database.dart';
 import 'package:spindle/di.dart';
+import 'package:spindle/page/desktop/player/player_view_model.dart';
 import 'package:spindle/router/app_router.dart';
 import 'package:spindle/service/audio_service.dart';
 import 'package:spindle/service/bookmark_service.dart';
@@ -43,10 +45,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final playerViewModel = GetIt.instance.get<PlayerViewModel>();
+
     return CallbackShortcuts(
       bindings: {
         const SingleActivator(LogicalKeyboardKey.space): () {
-          AudioService.instance.togglePlayPause();
+          playerViewModel.togglePlayPause();
         },
       },
       child: Focus(

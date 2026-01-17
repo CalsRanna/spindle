@@ -1,11 +1,12 @@
+import 'package:get_it/get_it.dart';
 import 'package:signals/signals.dart';
 import 'package:spindle/entity/song.dart';
+import 'package:spindle/page/desktop/player/player_view_model.dart';
 import 'package:spindle/repository/song_repository.dart';
-import 'package:spindle/service/audio_service.dart';
 
 class FavoritesViewModel {
   final _songRepository = SongRepository();
-  final _audioService = AudioService.instance;
+  final _playerViewModel = GetIt.instance.get<PlayerViewModel>();
 
   final songs = Signal<List<Song>>([]);
   final isLoading = Signal<bool>(false);
@@ -25,13 +26,23 @@ class FavoritesViewModel {
 
   void playSong(Song song) {
     final index = songs.value.indexOf(song);
-    _audioService.playQueue(songs.value, startIndex: index);
+    if (index >= 0) {
+      _playerViewModel.playQueue(songs.value, startIndex: index);
+    } else {
+      _playerViewModel.playSong(song);
+    }
   }
 
   void playAll() {
     if (songs.value.isEmpty) return;
-    _audioService.playQueue(songs.value);
+    _playerViewModel.playQueue(songs.value);
   }
+
+  void addToQueue(Song song) {
+    _playerViewModel.addToQueue(song);
+  }
+
+  Signal<Song?> get currentSong => _playerViewModel.currentSong;
 
   Future<void> toggleFavorite(Song song) async {
     if (song.id == null) return;

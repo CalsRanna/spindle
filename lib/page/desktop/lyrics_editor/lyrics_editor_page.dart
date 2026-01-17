@@ -5,7 +5,6 @@ import 'package:signals/signals_flutter.dart';
 
 import 'package:spindle/entity/song.dart';
 import 'package:spindle/page/desktop/lyrics_editor/lyrics_editor_view_model.dart';
-import 'package:spindle/service/audio_service.dart';
 import 'package:spindle/util/app_theme.dart';
 
 @RoutePage()
@@ -15,14 +14,14 @@ class DesktopLyricsEditorPage extends StatefulWidget {
   const DesktopLyricsEditorPage({super.key, required this.song});
 
   @override
-  State<DesktopLyricsEditorPage> createState() => _DesktopLyricsEditorPageState();
+  State<DesktopLyricsEditorPage> createState() =>
+      _DesktopLyricsEditorPageState();
 }
 
 class _DesktopLyricsEditorPageState extends State<DesktopLyricsEditorPage> {
   final _viewModel = LyricsEditorViewModel();
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
-  final _audioService = AudioService.instance;
 
   @override
   void initState() {
@@ -48,7 +47,8 @@ class _DesktopLyricsEditorPageState extends State<DesktopLyricsEditorPage> {
     final cursorPos = _textController.selection.baseOffset;
     if (cursorPos < 0) return;
 
-    final newText = _viewModel.insertTimestamp(_textController.text, cursorPos);
+    final newText =
+        _viewModel.insertTimestamp(_textController.text, cursorPos);
     final timestampLength = _viewModel.getCurrentTimestamp().length;
 
     _textController.text = newText;
@@ -88,172 +88,174 @@ class _DesktopLyricsEditorPageState extends State<DesktopLyricsEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isSaving = _viewModel.isSaving.watch(context);
-    final position = _audioService.position.watch(context);
-    final isPlaying = _audioService.isPlaying.watch(context);
+    return Watch((context) {
+      final isSaving = _viewModel.isSaving.value;
+      final position = _viewModel.position.value;
+      final isPlaying = _viewModel.isPlaying.value;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('LYRICS EDITOR'),
-        actions: [
-          if (isSaving)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppTheme.accentColor,
-                ),
-              ),
-            )
-          else
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _save,
-              tooltip: 'Save lyrics',
-            ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Song info bar
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: AppTheme.cardBackground,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.song.title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        widget.song.displayArtist,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                // Playback controls
-                IconButton(
-                  icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
-                  onPressed: () => _audioService.togglePlayPause(),
-                ),
-                Text(
-                  _formatDuration(position),
-                  style: const TextStyle(
-                    fontFamily: 'monospace',
-                    fontSize: 14,
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('LYRICS EDITOR'),
+          actions: [
+            if (isSaving)
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
                     color: AppTheme.accentColor,
                   ),
                 ),
-              ],
-            ),
-          ),
-
-          // Toolbar
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: AppTheme.dividerColor),
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.save),
+                onPressed: _save,
+                tooltip: 'Save lyrics',
+              ),
+          ],
+        ),
+        body: Column(
+          children: [
+            // Song info bar
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: AppTheme.cardBackground,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.song.title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          widget.song.displayArtist,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Playback controls
+                  IconButton(
+                    icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow),
+                    onPressed: _viewModel.togglePlayPause,
+                  ),
+                  Text(
+                    _formatDuration(position),
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 14,
+                      color: AppTheme.accentColor,
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              children: [
-                _ToolbarButton(
-                  icon: Icons.timer,
-                  label: 'Insert Time',
-                  onPressed: _insertTimestamp,
+
+            // Toolbar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: AppTheme.dividerColor),
                 ),
-                const SizedBox(width: 8),
-                _ToolbarButton(
-                  icon: Icons.add,
-                  label: 'New Line + Time',
-                  onPressed: _insertNewLine,
-                ),
-                const Spacer(),
-                Text(
-                  'Current: ${_viewModel.getCurrentTimestamp()}',
+              ),
+              child: Row(
+                children: [
+                  _ToolbarButton(
+                    icon: Icons.timer,
+                    label: 'Insert Time',
+                    onPressed: _insertTimestamp,
+                  ),
+                  const SizedBox(width: 8),
+                  _ToolbarButton(
+                    icon: Icons.add,
+                    label: 'New Line + Time',
+                    onPressed: _insertNewLine,
+                  ),
+                  const Spacer(),
+                  Text(
+                    'Current: ${_viewModel.getCurrentTimestamp()}',
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Editor
+            Expanded(
+              child: KeyboardListener(
+                focusNode: FocusNode(),
+                onKeyEvent: (event) {
+                  // Ctrl/Cmd + T to insert timestamp
+                  if (event is KeyDownEvent &&
+                      event.logicalKey == LogicalKeyboardKey.keyT &&
+                      (HardwareKeyboard.instance.isControlPressed ||
+                          HardwareKeyboard.instance.isMetaPressed)) {
+                    _insertTimestamp();
+                  }
+                },
+                child: TextField(
+                  controller: _textController,
+                  focusNode: _focusNode,
+                  maxLines: null,
+                  expands: true,
+                  textAlignVertical: TextAlignVertical.top,
                   style: const TextStyle(
                     fontFamily: 'monospace',
-                    fontSize: 12,
-                    color: AppTheme.textSecondary,
+                    fontSize: 14,
+                    height: 1.8,
                   ),
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(16),
+                    border: InputBorder.none,
+                    hintText: 'Enter lyrics in LRC format...\n\n'
+                        'Example:\n'
+                        '[00:12.34]First line of lyrics\n'
+                        '[00:15.67]Second line of lyrics',
+                    hintStyle: TextStyle(color: AppTheme.textSecondary),
+                  ),
+                  onChanged: _viewModel.updateText,
                 ),
-              ],
-            ),
-          ),
-
-          // Editor
-          Expanded(
-            child: KeyboardListener(
-              focusNode: FocusNode(),
-              onKeyEvent: (event) {
-                // Ctrl/Cmd + T to insert timestamp
-                if (event is KeyDownEvent &&
-                    event.logicalKey == LogicalKeyboardKey.keyT &&
-                    (HardwareKeyboard.instance.isControlPressed ||
-                        HardwareKeyboard.instance.isMetaPressed)) {
-                  _insertTimestamp();
-                }
-              },
-              child: TextField(
-                controller: _textController,
-                focusNode: _focusNode,
-                maxLines: null,
-                expands: true,
-                textAlignVertical: TextAlignVertical.top,
-                style: const TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: 14,
-                  height: 1.8,
-                ),
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.all(16),
-                  border: InputBorder.none,
-                  hintText: 'Enter lyrics in LRC format...\n\n'
-                      'Example:\n'
-                      '[00:12.34]First line of lyrics\n'
-                      '[00:15.67]Second line of lyrics',
-                  hintStyle: TextStyle(color: AppTheme.textSecondary),
-                ),
-                onChanged: _viewModel.updateText,
               ),
             ),
-          ),
 
-          // Help text
-          Container(
-            padding: const EdgeInsets.all(12),
-            color: AppTheme.cardBackground,
-            child: const Row(
-              children: [
-                Icon(Icons.info_outline, size: 16, color: AppTheme.textSecondary),
-                SizedBox(width: 8),
-                Text(
-                  'Tip: Use Ctrl+T (Cmd+T on Mac) to insert timestamp at cursor',
-                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-                ),
-              ],
+            // Help text
+            Container(
+              padding: const EdgeInsets.all(12),
+              color: AppTheme.cardBackground,
+              child: const Row(
+                children: [
+                  Icon(Icons.info_outline, size: 16, color: AppTheme.textSecondary),
+                  SizedBox(width: 8),
+                  Text(
+                    'Tip: Use Ctrl+T (Cmd+T on Mac) to insert timestamp at cursor',
+                    style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
   String _formatDuration(Duration d) {

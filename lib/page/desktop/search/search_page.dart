@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:spindle/page/desktop/search/search_view_model.dart';
-import 'package:spindle/service/audio_service.dart';
 import 'package:spindle/util/app_theme.dart';
 import 'package:spindle/widget/song_tile.dart';
 
@@ -33,51 +32,53 @@ class _DesktopSearchPageState extends State<DesktopSearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    final query = _viewModel.searchQuery.watch(context);
-    final results = _viewModel.results.watch(context);
-    final isSearching = _viewModel.isSearching.watch(context);
-    final currentSong = AudioService.instance.currentSong.watch(context);
+    return Watch((context) {
+      final query = _viewModel.searchQuery.value;
+      final results = _viewModel.results.value;
+      final isSearching = _viewModel.isSearching.value;
+      final currentSong = _viewModel.currentSong.value;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('SEARCH'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.router.maybePop(),
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('SEARCH'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.router.maybePop(),
+          ),
         ),
-      ),
-      body: Column(
-        children: [
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: 'Search songs, artists, albums...',
-                prefixIcon: const Icon(Icons.search, color: AppTheme.textSecondary),
-                suffixIcon: query.isEmpty
-                    ? const SizedBox.shrink()
-                    : IconButton(
-                        icon: const Icon(Icons.clear, color: AppTheme.textSecondary),
-                        onPressed: () {
-                          _searchController.clear();
-                          _viewModel.search('');
-                        },
-                      ),
+        body: Column(
+          children: [
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Search songs, artists, albums...',
+                  prefixIcon: const Icon(Icons.search, color: AppTheme.textSecondary),
+                  suffixIcon: query.isEmpty
+                      ? const SizedBox.shrink()
+                      : IconButton(
+                          icon: const Icon(Icons.clear, color: AppTheme.textSecondary),
+                          onPressed: () {
+                            _searchController.clear();
+                            _viewModel.search('');
+                          },
+                        ),
+                ),
+                onChanged: _viewModel.search,
               ),
-              onChanged: _viewModel.search,
             ),
-          ),
 
-          // Results
-          Expanded(
-            child: _buildContent(query, results, isSearching, currentSong),
-          ),
-        ],
-      ),
-    );
+            // Results
+            Expanded(
+              child: _buildContent(query, results, isSearching, currentSong),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildContent(String query, List results, bool isSearching, currentSong) {

@@ -21,7 +21,6 @@ class DesktopPlayerPage extends StatefulWidget {
 
 class _DesktopPlayerPageState extends State<DesktopPlayerPage> {
   late final PlayerViewModel _viewModel;
-  final _audioService = AudioService.instance;
   final _lyricsService = LyricsService.instance;
   String? _lastLoadedSongPath;
   EffectCleanup? _effectCleanup;
@@ -34,7 +33,7 @@ class _DesktopPlayerPageState extends State<DesktopPlayerPage> {
 
     // Listen for song changes
     _effectCleanup = effect(() {
-      final currentPath = _audioService.currentSong.value?.filePath;
+      final currentPath = _viewModel.currentSong.value?.filePath;
       if (currentPath != _lastLoadedSongPath) {
         _lastLoadedSongPath = currentPath;
         _lyricsService.loadLyrics(currentPath);
@@ -49,65 +48,67 @@ class _DesktopPlayerPageState extends State<DesktopPlayerPage> {
   }
 
   void _loadLyrics() {
-    final currentSong = _audioService.currentSong.value;
+    final currentSong = _viewModel.currentSong.value;
     _lastLoadedSongPath = currentSong?.filePath;
     _lyricsService.loadLyrics(currentSong?.filePath);
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentSong = _audioService.currentSong.watch(context);
+    return Watch((context) {
+      final currentSong = _viewModel.currentSong.value;
 
-    if (currentSong == null) {
-      return const Scaffold(body: Center(child: Text('No song playing')));
-    }
+      if (currentSong == null) {
+        return const Scaffold(body: Center(child: Text('No song playing')));
+      }
 
-    final isPlaying = _audioService.isPlaying.watch(context);
-    final position = _audioService.position.watch(context);
-    final duration = _audioService.duration.watch(context);
-    final shuffleMode = _audioService.shuffleMode.watch(context);
-    final repeatMode = _audioService.repeatMode.watch(context);
+      final isPlaying = _viewModel.isPlaying.value;
+      final position = _viewModel.position.value;
+      final duration = _viewModel.duration.value;
+      final shuffleMode = _viewModel.shuffleMode.value;
+      final repeatMode = _viewModel.repeatMode.value;
 
-    final progress = duration.inMilliseconds > 0
-        ? position.inMilliseconds / duration.inMilliseconds
-        : 0.0;
+      final progress = duration.inMilliseconds > 0
+          ? position.inMilliseconds / duration.inMilliseconds
+          : 0.0;
 
-    return Scaffold(
-      body: BlurBackground(
-        imagePath: currentSong.albumArtPath,
-        child: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final isWide = constraints.maxWidth > 800;
+      return Scaffold(
+        body: BlurBackground(
+          imagePath: currentSong.albumArtPath,
+          child: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth > 800;
 
-              if (isWide) {
-                return _buildDesktopLayout(
-                  context,
-                  currentSong: currentSong,
-                  isPlaying: isPlaying,
-                  position: position,
-                  duration: duration,
-                  progress: progress,
-                  shuffleMode: shuffleMode,
-                  repeatMode: repeatMode,
-                );
-              } else {
-                return _buildMobileLayout(
-                  context,
-                  currentSong: currentSong,
-                  isPlaying: isPlaying,
-                  position: position,
-                  duration: duration,
-                  progress: progress,
-                  shuffleMode: shuffleMode,
-                  repeatMode: repeatMode,
-                );
-              }
-            },
+                if (isWide) {
+                  return _buildDesktopLayout(
+                    context,
+                    currentSong: currentSong,
+                    isPlaying: isPlaying,
+                    position: position,
+                    duration: duration,
+                    progress: progress,
+                    shuffleMode: shuffleMode,
+                    repeatMode: repeatMode,
+                  );
+                } else {
+                  return _buildMobileLayout(
+                    context,
+                    currentSong: currentSong,
+                    isPlaying: isPlaying,
+                    position: position,
+                    duration: duration,
+                    progress: progress,
+                    shuffleMode: shuffleMode,
+                    repeatMode: repeatMode,
+                  );
+                }
+              },
+            ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildDesktopLayout(

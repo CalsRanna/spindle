@@ -1,14 +1,15 @@
-import 'package:signals/signals.dart';
 import 'dart:io';
-import 'package:path/path.dart' as p;
 
+import 'package:get_it/get_it.dart';
+import 'package:path/path.dart' as p;
+import 'package:signals/signals.dart';
 import 'package:spindle/entity/song.dart';
-import 'package:spindle/service/audio_service.dart';
+import 'package:spindle/page/desktop/player/player_view_model.dart';
 import 'package:spindle/service/lyrics_service.dart';
 import 'package:spindle/util/logger_util.dart';
 
 class LyricsEditorViewModel {
-  final _audioService = AudioService.instance;
+  final _playerViewModel = GetIt.instance.get<PlayerViewModel>();
   final _lyricsService = LyricsService.instance;
   final _logger = LoggerUtil.instance;
 
@@ -17,6 +18,14 @@ class LyricsEditorViewModel {
   final message = Signal<String?>(null);
 
   Song? _song;
+
+  // 暴露播放状态供 UI 使用
+  Signal<Duration> get position => _playerViewModel.position;
+  Signal<bool> get isPlaying => _playerViewModel.isPlaying;
+
+  void togglePlayPause() {
+    _playerViewModel.togglePlayPause();
+  }
 
   void init(Song song) {
     _song = song;
@@ -54,8 +63,8 @@ class LyricsEditorViewModel {
 
   /// Insert timestamp at current cursor position
   String insertTimestamp(String text, int cursorPosition) {
-    final position = _audioService.position.value;
-    final timestamp = _formatTimestamp(position);
+    final pos = _playerViewModel.position.value;
+    final timestamp = _formatTimestamp(pos);
 
     final before = text.substring(0, cursorPosition);
     final after = text.substring(cursorPosition);
@@ -66,12 +75,13 @@ class LyricsEditorViewModel {
   String _formatTimestamp(Duration duration) {
     final minutes = duration.inMinutes.toString().padLeft(2, '0');
     final seconds = (duration.inSeconds % 60).toString().padLeft(2, '0');
-    final centiseconds = ((duration.inMilliseconds % 1000) ~/ 10).toString().padLeft(2, '0');
+    final centiseconds =
+        ((duration.inMilliseconds % 1000) ~/ 10).toString().padLeft(2, '0');
     return '[$minutes:$seconds.$centiseconds]';
   }
 
   String getCurrentTimestamp() {
-    return _formatTimestamp(_audioService.position.value);
+    return _formatTimestamp(_playerViewModel.position.value);
   }
 
   Future<bool> save() async {

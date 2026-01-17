@@ -61,51 +61,53 @@ class _LyricsViewState extends State<LyricsView> {
 
   @override
   Widget build(BuildContext context) {
-    final lyrics = _lyricsService.currentLyrics.watch(context);
+    return Watch((context) {
+      final lyrics = _lyricsService.currentLyrics.value;
 
-    if (lyrics.isEmpty) {
-      return const _EmptyLyricsView();
-    }
+      if (lyrics.isEmpty) {
+        return const _EmptyLyricsView();
+      }
 
-    // Static lyrics (no timing)
-    if (!lyrics.hasTiming) {
-      return _StaticLyricsView(lyrics: lyrics);
-    }
+      // Static lyrics (no timing)
+      if (!lyrics.hasTiming) {
+        return _StaticLyricsView(lyrics: lyrics);
+      }
 
-    // Timed lyrics with highlighting
-    final currentIndex = lyrics.getCurrentLineIndex(widget.position);
+      // Timed lyrics with highlighting
+      final currentIndex = lyrics.getCurrentLineIndex(widget.position);
 
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 100),
-      itemCount: lyrics.lines.length,
-      itemBuilder: (context, index) {
-        final line = lyrics.lines[index];
-        final isHighlighted = index == currentIndex;
-        final isPast = index < currentIndex;
+      return ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.symmetric(vertical: 100),
+        itemCount: lyrics.lines.length,
+        itemBuilder: (context, index) {
+          final line = lyrics.lines[index];
+          final isHighlighted = index == currentIndex;
+          final isPast = index < currentIndex;
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          child: AnimatedDefaultTextStyle(
-            duration: const Duration(milliseconds: 200),
-            style: TextStyle(
-              fontSize: isHighlighted ? 22 : 18,
-              fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
-              color: isHighlighted
-                  ? AppTheme.accentColor
-                  : isPast
-                      ? AppTheme.textSecondary.withValues(alpha: 0.5)
-                      : AppTheme.textSecondary,
-              height: 1.5,
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontSize: isHighlighted ? 22 : 18,
+                fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+                color: isHighlighted
+                    ? AppTheme.accentColor
+                    : isPast
+                        ? AppTheme.textSecondary.withValues(alpha: 0.5)
+                        : AppTheme.textSecondary,
+                height: 1.5,
+              ),
+              child: Text(
+                line.text,
+                textAlign: TextAlign.center,
+              ),
             ),
-            child: Text(
-              line.text,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    });
   }
 }
 

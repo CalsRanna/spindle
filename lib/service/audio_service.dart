@@ -3,13 +3,14 @@ import 'dart:io';
 import 'package:audio_service/audio_service.dart' as audio;
 import 'package:audio_session/audio_session.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:signals/signals.dart';
 import 'package:spindle/entity/song.dart';
 import 'package:spindle/repository/play_history_repository.dart';
 import 'package:spindle/repository/song_repository.dart';
 
 enum RepeatMode { off, all, one }
 
+/// 无状态的音频服务，仅负责音频播放操作和暴露流
+/// 所有 UI 状态应由 PlayerViewModel 管理
 class AudioService {
   static final AudioService instance = AudioService._();
 
@@ -18,23 +19,20 @@ class AudioService {
   final _historyRepository = PlayHistoryRepository();
 
   _SpindleAudioHandler? _audioHandler;
-
-  // Signals for reactive state
-  final currentSong = Signal<Song?>(null);
-  final isPlaying = Signal<bool>(false);
-  final position = Signal<Duration>(Duration.zero);
-  final duration = Signal<Duration>(Duration.zero);
-  final queue = Signal<List<Song>>([]);
-  final currentIndex = Signal<int>(0);
-  final shuffleMode = Signal<bool>(false);
-  final repeatMode = Signal<RepeatMode>(RepeatMode.off);
-  final volume = Signal<double>(1.0);
-
   bool _initialized = false;
 
-  AudioService._() {
-    _initListeners();
-  }
+  AudioService._();
+
+  // 暴露 just_audio 的原生流
+  Stream<bool> get playingStream => _player.playingStream;
+  Stream<Duration> get positionStream => _player.positionStream;
+  Stream<Duration?> get durationStream => _player.durationStream;
+  Stream<PlayerState> get playerStateStream => _player.playerStateStream;
+
+  // 当前播放器状态的同步访问器
+  bool get isPlaying => _player.playing;
+  Duration get position => _player.position;
+  Duration get duration => _player.duration ?? Duration.zero;
 
   /// Initialize audio session for background playback
   Future<void> init() async {
@@ -71,12 +69,10 @@ class AudioService {
     // Handle audio interruptions (phone calls, etc.)
     session.interruptionEventStream.listen((event) {
       if (event.begin) {
-        // Audio interrupted
-        if (isPlaying.value) {
+        if (_player.playing) {
           pause();
         }
       } else {
-        // Interruption ended
         if (event.type == AudioInterruptionType.pause) {
           play();
         }
@@ -91,52 +87,30 @@ class AudioService {
     _initialized = true;
   }
 
-  void _initListeners() {
-    _player.playingStream.listen((playing) {
-      isPlaying.value = playing;
-      _updatePlaybackState();
-    });
-
-    _player.positionStream.listen((pos) {
-      position.value = pos;
-      _updatePlaybackState();
-    });
-
-    _player.durationStream.listen((dur) {
-      if (dur != null) {
-        duration.value = dur;
-        _updateMediaItem();
-      }
-    });
-
-    _player.playerStateStream.listen((state) {
-      if (state.processingState == ProcessingState.completed) {
-        _onSongComplete();
-      }
-    });
-  }
-
-  void _updateMediaItem() {
-    final song = currentSong.value;
-    if (song == null || _audioHandler == null) return;
+  void updateMediaItem(Song song, Duration duration) {
+    if (_audioHandler == null) return;
 
     _audioHandler!.setMediaItem(audio.MediaItem(
       id: song.id?.toString() ?? song.filePath,
       title: song.title,
       artist: song.artist ?? 'Unknown Artist',
       album: song.album ?? 'Unknown Album',
-      duration: duration.value,
+      duration: duration,
       artUri: song.albumArtPath != null ? Uri.file(song.albumArtPath!) : null,
     ));
   }
 
-  void _updatePlaybackState() {
+  void updatePlaybackState({
+    required bool isPlaying,
+    required Duration position,
+    required int queueIndex,
+  }) {
     if (!_initialized || _audioHandler == null) return;
 
     _audioHandler!.setPlaybackState(audio.PlaybackState(
       controls: [
         audio.MediaControl.skipToPrevious,
-        isPlaying.value ? audio.MediaControl.pause : audio.MediaControl.play,
+        isPlaying ? audio.MediaControl.pause : audio.MediaControl.play,
         audio.MediaControl.skipToNext,
       ],
       systemActions: const {
@@ -146,11 +120,11 @@ class AudioService {
       },
       androidCompactActionIndices: const [0, 1, 2],
       processingState: audio.AudioProcessingState.ready,
-      playing: isPlaying.value,
-      updatePosition: position.value,
+      playing: isPlaying,
+      updatePosition: position,
       bufferedPosition: Duration.zero,
       speed: 1.0,
-      queueIndex: currentIndex.value,
+      queueIndex: queueIndex,
     ));
   }
 
@@ -158,13 +132,8 @@ class AudioService {
     // Check if file exists
     final file = File(song.filePath);
     if (!await file.exists()) {
-      // File doesn't exist, might have been deleted or using invalid temp path
-      currentSong.value = null;
       throw Exception('Audio file not found: ${song.filePath}');
     }
-
-    currentSong.value = song;
-    _updateMediaItem();
 
     // Record play history
     if (song.id != null) {
@@ -172,22 +141,8 @@ class AudioService {
       await _historyRepository.recordPlay(song.id!);
     }
 
-    try {
-      await _player.setFilePath(song.filePath);
-      await _player.play();
-    } catch (e) {
-      currentSong.value = null;
-      rethrow;
-    }
-  }
-
-  Future<void> playQueue(List<Song> songs, {int startIndex = 0}) async {
-    if (songs.isEmpty) return;
-
-    queue.value = List.from(songs);
-    currentIndex.value = startIndex;
-
-    await playSong(songs[startIndex]);
+    await _player.setFilePath(song.filePath);
+    await _player.play();
   }
 
   Future<void> play() async {
@@ -198,199 +153,25 @@ class AudioService {
     await _player.pause();
   }
 
-  Future<void> togglePlayPause() async {
-    if (isPlaying.value) {
-      await pause();
-    } else {
-      // If no song is loaded, play a random song from library
-      if (currentSong.value == null) {
-        await playRandomSong();
-      } else {
-        await play();
-      }
-    }
-  }
-
-  /// Play a random song from the library
-  Future<void> playRandomSong() async {
-    final songs = await _songRepository.getAll();
-    if (songs.isEmpty) return;
-
-    final randomIndex = DateTime.now().millisecondsSinceEpoch % songs.length;
-    await playQueue(songs, startIndex: randomIndex);
-  }
-
   Future<void> stop() async {
     await _player.stop();
-    currentSong.value = null;
   }
 
   Future<void> seek(Duration position) async {
     await _player.seek(position);
   }
 
-  Future<void> seekToPercent(double percent) async {
-    final dur = duration.value;
-    final newPosition = Duration(
-      milliseconds: (dur.inMilliseconds * percent).round(),
-    );
-    await seek(newPosition);
+  Future<void> setVolume(double volume) async {
+    await _player.setVolume(volume.clamp(0.0, 1.0));
   }
 
-  Future<void> next() async {
-    final q = queue.value;
-    if (q.isEmpty) return;
-
-    int nextIndex;
-    if (shuffleMode.value) {
-      nextIndex = DateTime.now().millisecondsSinceEpoch % q.length;
-    } else {
-      nextIndex = currentIndex.value + 1;
-      if (nextIndex >= q.length) {
-        if (repeatMode.value == RepeatMode.all) {
-          nextIndex = 0;
-        } else {
-          return;
-        }
-      }
-    }
-
-    currentIndex.value = nextIndex;
-    await playSong(q[nextIndex]);
-  }
-
-  Future<void> previous() async {
-    // If more than 3 seconds into the song, restart it
-    if (position.value.inSeconds > 3) {
-      await seek(Duration.zero);
-      return;
-    }
-
-    final q = queue.value;
-    if (q.isEmpty) return;
-
-    int prevIndex = currentIndex.value - 1;
-    if (prevIndex < 0) {
-      if (repeatMode.value == RepeatMode.all) {
-        prevIndex = q.length - 1;
-      } else {
-        await seek(Duration.zero);
-        return;
-      }
-    }
-
-    currentIndex.value = prevIndex;
-    await playSong(q[prevIndex]);
-  }
-
-  void _onSongComplete() {
-    switch (repeatMode.value) {
-      case RepeatMode.one:
-        seek(Duration.zero);
-        play();
-        break;
-      case RepeatMode.all:
-      case RepeatMode.off:
-        next();
-        break;
-    }
-  }
-
-  void toggleShuffle() {
-    shuffleMode.value = !shuffleMode.value;
-  }
-
-  void cycleRepeatMode() {
-    switch (repeatMode.value) {
-      case RepeatMode.off:
-        repeatMode.value = RepeatMode.all;
-        break;
-      case RepeatMode.all:
-        repeatMode.value = RepeatMode.one;
-        break;
-      case RepeatMode.one:
-        repeatMode.value = RepeatMode.off;
-        break;
-    }
-  }
-
-  Future<void> setVolume(double vol) async {
-    volume.value = vol.clamp(0.0, 1.0);
-    await _player.setVolume(volume.value);
-  }
-
-  void addToQueue(Song song) {
-    final q = List<Song>.from(queue.value);
-    q.add(song);
-    queue.value = q;
-  }
-
-  void removeFromQueue(int index) {
-    if (index < 0 || index >= queue.value.length) return;
-
-    final q = List<Song>.from(queue.value);
-    q.removeAt(index);
-    queue.value = q;
-
-    // Adjust current index if necessary
-    if (index < currentIndex.value) {
-      currentIndex.value = currentIndex.value - 1;
-    } else if (index == currentIndex.value && q.isNotEmpty) {
-      if (currentIndex.value >= q.length) {
-        currentIndex.value = q.length - 1;
-      }
-      playSong(q[currentIndex.value]);
-    }
-  }
-
-  void reorderQueue(int oldIndex, int newIndex) {
-    final q = List<Song>.from(queue.value);
-    if (newIndex > oldIndex) newIndex--;
-
-    final item = q.removeAt(oldIndex);
-    q.insert(newIndex, item);
-    queue.value = q;
-
-    // Update current index
-    if (oldIndex == currentIndex.value) {
-      currentIndex.value = newIndex;
-    } else if (oldIndex < currentIndex.value && newIndex >= currentIndex.value) {
-      currentIndex.value = currentIndex.value - 1;
-    } else if (oldIndex > currentIndex.value && newIndex <= currentIndex.value) {
-      currentIndex.value = currentIndex.value + 1;
-    }
-  }
-
-  void clearQueue() {
-    queue.value = [];
-    currentIndex.value = 0;
-  }
-
-  String get positionText => _formatDuration(position.value);
-  String get durationText => _formatDuration(duration.value);
-
-  double get progress {
-    if (duration.value.inMilliseconds == 0) return 0;
-    return position.value.inMilliseconds / duration.value.inMilliseconds;
-  }
-
-  String _formatDuration(Duration d) {
-    final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
+  /// Play a random song from the library
+  Future<List<Song>> getAllSongs() async {
+    return await _songRepository.getAll();
   }
 
   void dispose() {
     _player.dispose();
-    currentSong.dispose();
-    isPlaying.dispose();
-    position.dispose();
-    duration.dispose();
-    queue.dispose();
-    currentIndex.dispose();
-    shuffleMode.dispose();
-    repeatMode.dispose();
-    volume.dispose();
   }
 }
 
@@ -398,6 +179,13 @@ class AudioService {
 class _SpindleAudioHandler extends audio.BaseAudioHandler
     with audio.SeekHandler, audio.QueueHandler {
   final AudioService _service;
+
+  // 回调函数，由 PlayerViewModel 设置
+  void Function()? onPlay;
+  void Function()? onPause;
+  void Function()? onStop;
+  void Function()? onSkipToNext;
+  void Function()? onSkipToPrevious;
 
   _SpindleAudioHandler(this._service);
 
@@ -411,17 +199,17 @@ class _SpindleAudioHandler extends audio.BaseAudioHandler
 
   @override
   Future<void> play() async {
-    await _service.play();
+    onPlay?.call();
   }
 
   @override
   Future<void> pause() async {
-    await _service.pause();
+    onPause?.call();
   }
 
   @override
   Future<void> stop() async {
-    await _service.stop();
+    onStop?.call();
   }
 
   @override
@@ -431,11 +219,11 @@ class _SpindleAudioHandler extends audio.BaseAudioHandler
 
   @override
   Future<void> skipToNext() async {
-    await _service.next();
+    onSkipToNext?.call();
   }
 
   @override
   Future<void> skipToPrevious() async {
-    await _service.previous();
+    onSkipToPrevious?.call();
   }
 }

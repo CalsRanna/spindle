@@ -1,11 +1,12 @@
+import 'package:get_it/get_it.dart';
 import 'package:signals/signals.dart';
 import 'package:spindle/entity/song.dart';
+import 'package:spindle/page/desktop/player/player_view_model.dart';
 import 'package:spindle/repository/song_repository.dart';
-import 'package:spindle/service/audio_service.dart';
 
 class SearchViewModel {
   final _songRepository = SongRepository();
-  final _audioService = AudioService.instance;
+  final _playerViewModel = GetIt.instance.get<PlayerViewModel>();
 
   final searchQuery = Signal<String>('');
   final results = Signal<List<Song>>([]);
@@ -30,15 +31,11 @@ class SearchViewModel {
     final allResults = results.value;
     final index = allResults.indexOf(song);
     if (index >= 0) {
-      _audioService.playQueue(allResults, startIndex: index);
+      _playerViewModel.playQueue(allResults, startIndex: index);
     } else {
-      _audioService.playSong(song);
+      _playerViewModel.playSong(song);
     }
   }
 
-  void dispose() {
-    searchQuery.dispose();
-    results.dispose();
-    isSearching.dispose();
-  }
+  Signal<Song?> get currentSong => _playerViewModel.currentSong;
 }
