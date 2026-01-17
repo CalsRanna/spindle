@@ -30,21 +30,24 @@ class WiFiTransferViewModel {
   }
 
   /// Import all uploaded files to the music library
-  Future<int> importUploadedFiles() async {
+  Future<({int audioCount, int lyricsCount})> importUploadedFiles() async {
     final paths = _wifiTransferService.getUploadedFilePaths();
-    if (paths.isEmpty) return 0;
+    if (paths.isEmpty) return (audioCount: 0, lyricsCount: 0);
 
     isImporting.value = true;
     try {
-      final count = await _fileService.importFiles(paths);
-      importedCount.value = count;
+      final result = await _fileService.importFiles(paths);
+      importedCount.value = result.audioCount;
 
       // Refresh library
-      if (count > 0) {
-        await _libraryViewModel.loadSongs();
+      if (result.audioCount > 0) {
+        await _libraryViewModel.refresh();
       }
 
-      return count;
+      // Clear uploaded files after import
+      _wifiTransferService.clearUploadedFiles();
+
+      return result;
     } finally {
       isImporting.value = false;
     }

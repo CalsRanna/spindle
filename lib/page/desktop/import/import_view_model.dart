@@ -26,28 +26,39 @@ class ImportViewModel {
     folders.value = await _folderRepository.getAll();
   }
 
-  /// Pick and import audio files directly (works on iOS)
-  Future<void> pickAndImportFiles() async {
+  /// Pick and import audio/lyrics files directly (works on iOS)
+  Future<({int audioCount, int lyricsCount})> pickAndImportFiles() async {
     isScanning.value = true;
     scanProgress.value = 'Selecting files...';
 
     try {
-      final filePaths = await _fileService.pickAudioFiles();
+      final filePaths = await _fileService.pickFiles();
       if (filePaths.isEmpty) {
         scanProgress.value = 'No files selected';
-        return;
+        return (audioCount: 0, lyricsCount: 0);
       }
 
       scanProgress.value = 'Importing ${filePaths.length} files...';
-      final count = await _fileService.importFiles(filePaths);
+      final result = await _fileService.importFiles(filePaths);
 
-      if (count > 0) {
-        scanProgress.value = 'Imported $count songs';
-      } else {
-        scanProgress.value = 'No new songs imported';
+      final messages = <String>[];
+      if (result.audioCount > 0) {
+        messages.add('${result.audioCount} songs');
       }
+      if (result.lyricsCount > 0) {
+        messages.add('${result.lyricsCount} lyrics');
+      }
+
+      if (messages.isNotEmpty) {
+        scanProgress.value = 'Imported ${messages.join(', ')}';
+      } else {
+        scanProgress.value = 'No new files imported';
+      }
+
+      return result;
     } catch (e) {
       scanProgress.value = 'Error: $e';
+      return (audioCount: 0, lyricsCount: 0);
     } finally {
       isScanning.value = false;
     }

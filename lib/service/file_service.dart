@@ -18,7 +18,7 @@ class FileService {
   final _bookmarkService = BookmarkService.instance;
   final _logger = LoggerUtil.instance;
 
-  static const _supportedExtensions = [
+  static const _supportedAudioExtensions = [
     '.mp3',
     '.flac',
     '.wav',
@@ -30,7 +30,14 @@ class FileService {
     '.alac',
   ];
 
-  static const _allowedExtensions = ['mp3', 'flac', 'wav', 'aac', 'm4a', 'ogg', 'wma', 'aiff', 'alac'];
+  static const _supportedLyricsExtensions = ['.lrc'];
+
+  static List<String> get _supportedExtensions =>
+      [..._supportedAudioExtensions, ..._supportedLyricsExtensions];
+
+  static const _allowedExtensions = [
+    'mp3', 'flac', 'wav', 'aac', 'm4a', 'ogg', 'wma', 'aiff', 'alac', 'lrc'
+  ];
 
   Future<String?> pickFolder() async {
     final result = await FilePicker.platform.getDirectoryPath();
@@ -44,8 +51,8 @@ class FileService {
     return result;
   }
 
-  /// Pick audio files directly (works on iOS)
-  Future<List<String>> pickAudioFiles() async {
+  /// Pick audio and lyrics files (works on iOS)
+  Future<List<String>> pickFiles() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: _allowedExtensions,
@@ -59,8 +66,20 @@ class FileService {
         .map((f) => f.path!)
         .toList();
 
-    _logger.i('Picked ${paths.length} audio files');
+    _logger.i('Picked ${paths.length} files');
     return paths;
+  }
+
+  /// Check if file is a lyrics file
+  bool _isLyricsFile(String filePath) {
+    final ext = '.${filePath.toLowerCase().split('.').last}';
+    return _supportedLyricsExtensions.contains(ext);
+  }
+
+  /// Check if file is an audio file
+  bool _isAudioFile(String filePath) {
+    final ext = '.${filePath.toLowerCase().split('.').last}';
+    return _supportedAudioExtensions.contains(ext);
   }
 
   /// Get the music directory inside app documents
@@ -106,8 +125,10 @@ class FileService {
   }
 
   /// Import files directly (for iOS - copies files to permanent storage)
-  Future<int> importFiles(List<String> filePaths) async {
-    int importedCount = 0;
+  /// Returns a record of (audioCount, lyricsCount)
+  Future<({int audioCount, int lyricsCount})> importFiles(List<String> filePaths) async {
+    int audioCount = 0;
+    int lyricsCount = 0;
     final isIOS = Platform.isIOS;
     final musicDir = await _getMusicDirectory();
 
@@ -133,6 +154,14 @@ class FileService {
           permanentPath = copiedPath;
         }
 
+        // Handle lyrics files - just copy, don't add to database
+        if (_isLyricsFile(permanentPath)) {
+          _logger.i('Imported lyrics: $permanentPath');
+          lyricsCount++;
+          continue;
+        }
+
+        // Handle audio files
         // Skip if already imported (check with permanent path)
         if (await _songRepository.exists(permanentPath)) {
           _logger.i('File already imported: $permanentPath');
@@ -165,14 +194,14 @@ class FileService {
         );
 
         await _songRepository.insert(song);
-        importedCount++;
+        audioCount++;
         _logger.i('Imported: ${song.title}');
       } catch (e) {
         _logger.e('Error importing file $filePath: $e');
       }
     }
 
-    return importedCount;
+    return (audioCount: audioCount, lyricsCount: lyricsCount);
   }
 
   /// Get the app's documents directory path

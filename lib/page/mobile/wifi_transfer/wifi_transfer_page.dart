@@ -47,11 +47,23 @@ class _MobileWifiTransferPageState extends State<MobileWifiTransferPage> {
   }
 
   Future<void> _importFiles() async {
-    final count = await _viewModel.importUploadedFiles();
+    final result = await _viewModel.importUploadedFiles();
     if (mounted) {
+      final messages = <String>[];
+      if (result.audioCount > 0) {
+        messages.add('${result.audioCount} songs');
+      }
+      if (result.lyricsCount > 0) {
+        messages.add('${result.lyricsCount} lyrics');
+      }
+
+      final message = messages.isNotEmpty
+          ? 'Imported ${messages.join(', ')}'
+          : 'No new files imported';
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Imported $count songs'),
+          content: Text(message),
           backgroundColor: AppTheme.accentColor,
         ),
       );
