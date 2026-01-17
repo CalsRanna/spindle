@@ -25,7 +25,6 @@ class AppRouter extends RootStackRouter {
     ),
     AutoRoute(page: DesktopQueueRoute.page),
     AutoRoute(page: DesktopImportRoute.page),
-    AutoRoute(page: DesktopLyricsEditorRoute.page),
     AutoRoute(page: DesktopMetadataEditorRoute.page),
     AutoRoute(page: DesktopWifiTransferRoute.page),
 

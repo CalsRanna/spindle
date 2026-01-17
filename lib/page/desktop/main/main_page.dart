@@ -38,20 +38,6 @@ class _DesktopMainPageState extends State<DesktopMainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isDesktop = constraints.maxWidth > 800;
-
-        if (isDesktop) {
-          return _buildDesktopLayout();
-        } else {
-          return _buildMobileLayout();
-        }
-      },
-    );
-  }
-
-  Widget _buildDesktopLayout() {
     return Scaffold(
       body: Row(
         children: [
@@ -72,24 +58,6 @@ class _DesktopMainPageState extends State<DesktopMainPage> {
                   ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMobileLayout() {
-    return Scaffold(
-      body: Stack(
-        children: [
-          const AutoRouter(),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: MiniPlayer(
-              onTap: () => context.router.push(const DesktopPlayerRoute()),
             ),
           ),
         ],

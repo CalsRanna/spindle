@@ -8,7 +8,6 @@ import 'package:spindle/service/audio_service.dart';
 import 'package:spindle/service/lyrics_service.dart';
 import 'package:spindle/util/app_theme.dart';
 import 'package:spindle/widget/album_cover.dart';
-import 'package:spindle/widget/blur_background.dart';
 import 'package:spindle/widget/lyrics_view.dart';
 
 @RoutePage()
@@ -73,145 +72,39 @@ class _DesktopPlayerPageState extends State<DesktopPlayerPage> {
           : 0.0;
 
       return Scaffold(
-        body: BlurBackground(
-          imagePath: currentSong.albumArtPath,
-          child: SafeArea(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final isWide = constraints.maxWidth > 800;
-
-                if (isWide) {
-                  return _buildDesktopLayout(
-                    context,
-                    currentSong: currentSong,
-                    isPlaying: isPlaying,
-                    position: position,
-                    duration: duration,
-                    progress: progress,
-                    shuffleMode: shuffleMode,
-                    repeatMode: repeatMode,
-                  );
-                } else {
-                  return _buildMobileLayout(
-                    context,
-                    currentSong: currentSong,
-                    isPlaying: isPlaying,
-                    position: position,
-                    duration: duration,
-                    progress: progress,
-                    shuffleMode: shuffleMode,
-                    repeatMode: repeatMode,
-                  );
-                }
-              },
+        body: Column(
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  // Left side - Player controls
+                  Expanded(
+                    flex: 1,
+                    child: _buildPlayerControls(
+                      context,
+                      currentSong: currentSong,
+                      isPlaying: isPlaying,
+                      position: position,
+                      duration: duration,
+                      progress: progress,
+                      shuffleMode: shuffleMode,
+                      repeatMode: repeatMode,
+                    ),
+                  ),
+                  // Divider
+                  Container(
+                    width: 1,
+                    color: AppTheme.dividerColor.withValues(alpha: 0.3),
+                  ),
+                  // Right side - Lyrics
+                  Expanded(flex: 1, child: LyricsView(position: position)),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       );
     });
-  }
-
-  Widget _buildDesktopLayout(
-    BuildContext context, {
-    required dynamic currentSong,
-    required bool isPlaying,
-    required Duration position,
-    required Duration duration,
-    required double progress,
-    required bool shuffleMode,
-    required RepeatMode repeatMode,
-  }) {
-    return Column(
-      children: [
-        _buildTopBar(context),
-        Expanded(
-          child: Row(
-            children: [
-              // Left side - Player controls
-              Expanded(
-                flex: 1,
-                child: _buildPlayerControls(
-                  context,
-                  currentSong: currentSong,
-                  isPlaying: isPlaying,
-                  position: position,
-                  duration: duration,
-                  progress: progress,
-                  shuffleMode: shuffleMode,
-                  repeatMode: repeatMode,
-                  albumCoverSize: 300,
-                ),
-              ),
-              // Divider
-              Container(
-                width: 1,
-                color: AppTheme.dividerColor.withValues(alpha: 0.3),
-              ),
-              // Right side - Lyrics
-              Expanded(flex: 1, child: LyricsView(position: position)),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMobileLayout(
-    BuildContext context, {
-    required dynamic currentSong,
-    required bool isPlaying,
-    required Duration position,
-    required Duration duration,
-    required double progress,
-    required bool shuffleMode,
-    required RepeatMode repeatMode,
-  }) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final albumCoverSize = (screenWidth - 80).clamp(200.0, 400.0);
-
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _buildTopBar(context),
-          const SizedBox(height: 24),
-          _buildPlayerControls(
-            context,
-            currentSong: currentSong,
-            isPlaying: isPlaying,
-            position: position,
-            duration: duration,
-            progress: progress,
-            shuffleMode: shuffleMode,
-            repeatMode: repeatMode,
-            albumCoverSize: albumCoverSize,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTopBar(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.keyboard_arrow_down, size: 32),
-            onPressed: () => context.router.maybePop(),
-          ),
-          const Text(
-            'PLAYING FROM LIBRARY',
-            style: TextStyle(
-              fontSize: 12,
-              letterSpacing: 1,
-              color: AppTheme.textSecondary,
-            ),
-          ),
-          IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
-        ],
-      ),
-    );
   }
 
   Widget _buildPlayerControls(
@@ -223,166 +116,212 @@ class _DesktopPlayerPageState extends State<DesktopPlayerPage> {
     required double progress,
     required bool shuffleMode,
     required RepeatMode repeatMode,
-    required double albumCoverSize,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Album cover
-          AlbumCover(
-            imagePath: currentSong.albumArtPath,
-            size: albumCoverSize,
-            borderRadius: 16,
-          ),
-
-          const SizedBox(height: 32),
-
-          // Song info
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.keyboard_arrow_down, size: 32),
+          onPressed: () => context.router.maybePop(),
+        ),
+        title: const Text('NOW PLAYING'),
+        centerTitle: true,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            color: AppTheme.cardBackground,
+            onSelected: (value) {
+              switch (value) {
+                case 'metadata':
+                  context.router.push(
+                    DesktopMetadataEditorRoute(song: currentSong),
+                  );
+                  break;
+                case 'lyrics':
+                  context.router.push(
+                    MobileLyricsEditorRoute(song: currentSong),
+                  );
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'metadata',
+                child: Row(
                   children: [
-                    Text(
-                      currentSong.title,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (currentSong.artist != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        currentSong.artist!,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: AppTheme.textSecondary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                    Icon(Icons.edit, size: 20),
+                    SizedBox(width: 12),
+                    Text('Edit Metadata'),
                   ],
                 ),
               ),
-              IconButton(
-                icon: Icon(
-                  currentSong.isFavorite
-                      ? Icons.favorite
-                      : Icons.favorite_border,
-                  color: currentSong.isFavorite ? AppTheme.accentColor : null,
+              const PopupMenuItem(
+                value: 'lyrics',
+                child: Row(
+                  children: [
+                    Icon(Icons.lyrics, size: 20),
+                    SizedBox(width: 12),
+                    Text('Edit Lyrics'),
+                  ],
                 ),
-                onPressed: _viewModel.toggleFavorite,
-              ),
-              IconButton(
-                icon: const Icon(Icons.edit_note),
-                onPressed: () =>
-                    context.router.push(DesktopLyricsEditorRoute(song: currentSong)),
-                tooltip: 'Edit lyrics',
-              ),
-              IconButton(
-                icon: const Icon(Icons.list),
-                onPressed: () => context.router.push(const DesktopQueueRoute()),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 24),
-
-          // Progress bar
-          Row(
-            children: [
-              Text(
-                _viewModel.positionText,
-                style: const TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 12,
-                ),
-              ),
-              Expanded(
-                child: SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    trackHeight: 4,
-                    thumbShape: const RoundSliderThumbShape(
-                      enabledThumbRadius: 6,
-                    ),
-                  ),
-                  child: Slider(
-                    value: progress.clamp(0.0, 1.0),
-                    onChanged: _viewModel.seekToPercent,
-                    activeColor: AppTheme.accentColor,
-                    inactiveColor: AppTheme.dividerColor,
-                  ),
-                ),
-              ),
-              Text(
-                _viewModel.durationText,
-                style: const TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Controls
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              IconButton(
-                icon: Icon(
-                  Icons.shuffle,
-                  color: shuffleMode
-                      ? AppTheme.accentColor
-                      : AppTheme.textSecondary,
-                ),
-                onPressed: _viewModel.toggleShuffle,
-              ),
-              IconButton(
-                icon: const Icon(Icons.skip_previous, size: 36),
-                onPressed: _viewModel.previous,
-              ),
-              Container(
-                width: 64,
-                height: 64,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppTheme.accentColor,
-                ),
-                child: IconButton(
-                  icon: Icon(
-                    isPlaying ? Icons.pause : Icons.play_arrow,
-                    size: 36,
-                    color: AppTheme.backgroundColor,
-                  ),
-                  onPressed: _viewModel.togglePlayPause,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.skip_next, size: 36),
-                onPressed: _viewModel.next,
-              ),
-              IconButton(
-                icon: Icon(
-                  repeatMode == RepeatMode.one
-                      ? Icons.repeat_one
-                      : Icons.repeat,
-                  color: repeatMode != RepeatMode.off
-                      ? AppTheme.accentColor
-                      : AppTheme.textSecondary,
-                ),
-                onPressed: _viewModel.cycleRepeatMode,
               ),
             ],
           ),
         ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Album cover
+            AlbumCover(
+              imagePath: currentSong.albumArtPath,
+              size: 300,
+              borderRadius: 16,
+            ),
+
+            const SizedBox(height: 32),
+
+            // Song info
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        currentSong.title,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (currentSong.artist != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          currentSong.artist!,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: AppTheme.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    currentSong.isFavorite
+                        ? Icons.favorite
+                        : Icons.favorite_border,
+                    color: currentSong.isFavorite ? AppTheme.accentColor : null,
+                  ),
+                  onPressed: _viewModel.toggleFavorite,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.queue_music),
+                  onPressed: () =>
+                      context.router.push(const DesktopQueueRoute()),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // Progress bar
+            Row(
+              children: [
+                Text(
+                  _viewModel.positionText,
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
+                Expanded(
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      trackHeight: 4,
+                      thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 6,
+                      ),
+                    ),
+                    child: Slider(
+                      value: progress.clamp(0.0, 1.0),
+                      onChanged: _viewModel.seekToPercent,
+                      activeColor: AppTheme.accentColor,
+                      inactiveColor: AppTheme.dividerColor,
+                    ),
+                  ),
+                ),
+                Text(
+                  _viewModel.durationText,
+                  style: const TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Controls
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.shuffle,
+                    color: shuffleMode
+                        ? AppTheme.accentColor
+                        : AppTheme.textSecondary,
+                  ),
+                  onPressed: _viewModel.toggleShuffle,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.skip_previous, size: 36),
+                  onPressed: _viewModel.previous,
+                ),
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppTheme.accentColor,
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      isPlaying ? Icons.pause : Icons.play_arrow,
+                      size: 36,
+                      color: AppTheme.backgroundColor,
+                    ),
+                    onPressed: _viewModel.togglePlayPause,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.skip_next, size: 36),
+                  onPressed: _viewModel.next,
+                ),
+                IconButton(
+                  icon: Icon(
+                    repeatMode == RepeatMode.one
+                        ? Icons.repeat_one
+                        : Icons.repeat,
+                    color: repeatMode != RepeatMode.off
+                        ? AppTheme.accentColor
+                        : AppTheme.textSecondary,
+                  ),
+                  onPressed: _viewModel.cycleRepeatMode,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
