@@ -21,7 +21,7 @@ class AppTheme {
         surface: cardBackground,
         onSurface: textPrimary,
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: backgroundColor,
         elevation: 0,
         centerTitle: false,
@@ -30,8 +30,9 @@ class AppTheme {
           fontSize: 24,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
+          fontFamily: GoogleFonts.firaMono().fontFamily,
         ),
-        iconTheme: IconThemeData(color: textPrimary),
+        iconTheme: const IconThemeData(color: textPrimary),
       ),
       cardTheme: const CardThemeData(
         color: cardBackground,
@@ -114,7 +115,7 @@ class AppTheme {
         ),
         hintStyle: const TextStyle(color: textSecondary),
       ),
-      fontFamily: GoogleFonts.sono().fontFamily,
+      fontFamily: GoogleFonts.firaMono().fontFamily,
       useMaterial3: true,
     );
   }
