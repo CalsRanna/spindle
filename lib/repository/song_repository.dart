@@ -23,16 +23,34 @@ class SongRepository {
     return validSongs;
   }
 
-  /// Remove songs whose files no longer exist
+  /// Supported audio extensions
+  static const _audioExtensions = [
+    '.mp3', '.flac', '.wav', '.aac', '.m4a', '.ogg', '.wma', '.aiff', '.alac'
+  ];
+
+  /// Remove invalid songs:
+  /// 1. Songs whose files no longer exist
+  /// 2. Non-audio files (like .lrc lyrics files)
   Future<int> cleanupInvalidSongs() async {
     final songs = await getAll();
     int removedCount = 0;
     for (final song in songs) {
+      bool shouldDelete = false;
+
+      // Check if file exists
       if (!await File(song.filePath).exists()) {
-        if (song.id != null) {
-          await delete(song.id!);
-          removedCount++;
+        shouldDelete = true;
+      } else {
+        // Check if it's an audio file (not lyrics or other)
+        final ext = '.${song.filePath.toLowerCase().split('.').last}';
+        if (!_audioExtensions.contains(ext)) {
+          shouldDelete = true;
         }
+      }
+
+      if (shouldDelete && song.id != null) {
+        await delete(song.id!);
+        removedCount++;
       }
     }
     return removedCount;

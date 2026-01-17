@@ -48,21 +48,9 @@ class SongTile extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             )
           : null,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            song.displayDuration,
-            style: const TextStyle(
-              color: AppTheme.textSecondary,
-              fontSize: 13,
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: AppTheme.textSecondary),
-            onPressed: onMoreTap,
-          ),
-        ],
+      trailing: Text(
+        song.displayDuration,
+        style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
       ),
       onTap: onTap,
     );

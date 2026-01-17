@@ -262,7 +262,8 @@ class FileService {
         if (entity is File) {
           final extension = entity.path.toLowerCase().split('.').last;
           _logger.d('File extension: .$extension');
-          if (_supportedExtensions.contains('.$extension')) {
+          // Only scan audio files, not lyrics
+          if (_supportedAudioExtensions.contains('.$extension')) {
             _logger.i('Found audio file: ${entity.path}');
             audioFiles.add(entity);
           }
