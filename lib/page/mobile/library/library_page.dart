@@ -48,7 +48,6 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
       final isLoading = _viewModel.isLoading.value;
       final songs = _viewModel.songs.value;
       final recentlyPlayed = _viewModel.recentlyPlayed.value;
-      final currentSong = _viewModel.currentSong.value;
       final favorites = _favoritesViewModel.songs.value;
 
       return Scaffold(
@@ -240,7 +239,6 @@ class _MobileLibraryPageState extends State<MobileLibraryPage>
                           final song = songs[index];
                           return SongTile(
                             song: song,
-                            isPlaying: currentSong?.id == song.id,
                             onTap: () => _viewModel.playSong(song),
                             onMoreTap: () => _showSongOptions(context, song),
                           );
