@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:spindle/page/desktop/import/import_view_model.dart';
+import 'package:spindle/router/app_router.gr.dart';
 import 'package:spindle/util/app_theme.dart';
 
 @RoutePage()
@@ -294,6 +295,59 @@ class _DesktopImportPageState extends State<DesktopImportPage> {
                 ),
               ),
             ],
+
+            // WiFi Transfer option (available on all platforms)
+            const SizedBox(height: 24),
+            Card(
+              color: AppTheme.cardBackground,
+              child: InkWell(
+                onTap: () => context.router.push(const DesktopWifiTransferRoute()),
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.wifi,
+                          color: Colors.blue,
+                          size: 28,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'WiFi Transfer',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Receive files from other devices on the network',
+                              style: TextStyle(
+                                color: AppTheme.textSecondary,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
             const SizedBox(height: 32),
 

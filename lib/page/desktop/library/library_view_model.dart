@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:get_it/get_it.dart';
 import 'package:signals/signals.dart';
 import 'package:spindle/entity/song.dart';
@@ -66,6 +68,33 @@ class LibraryViewModel {
 
   void addToQueue(Song song) {
     _playerViewModel.addToQueue(song);
+  }
+
+  /// Delete a song from the library
+  /// If [deleteFile] is true, also delete the file from disk
+  Future<void> deleteSong(Song song, {bool deleteFile = false}) async {
+    if (song.id == null) return;
+
+    // Delete from database
+    await _songRepository.delete(song.id!);
+
+    // Delete file if requested
+    if (deleteFile) {
+      final file = File(song.filePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+      // Also delete album art if it exists
+      if (song.albumArtPath != null) {
+        final artFile = File(song.albumArtPath!);
+        if (await artFile.exists()) {
+          await artFile.delete();
+        }
+      }
+    }
+
+    // Refresh the list
+    await loadSongs();
   }
 
   Signal<Song?> get currentSong => _playerViewModel.currentSong;

@@ -233,8 +233,76 @@ class _DesktopLibraryPageState extends State<DesktopLibraryPage>
                   context.router.push(DesktopMetadataEditorRoute(song: song));
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: Colors.red),
+                title: const Text('Delete', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showDeleteConfirmation(context, song);
+                },
+              ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, Song song) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        bool deleteFile = false;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: AppTheme.cardBackground,
+              title: const Text('Delete Song'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Are you sure you want to delete "${song.title}"?'),
+                  const SizedBox(height: 16),
+                  CheckboxListTile(
+                    value: deleteFile,
+                    onChanged: (value) => setState(() => deleteFile = value ?? false),
+                    title: const Text('Also delete the file'),
+                    subtitle: const Text(
+                      'This will permanently remove the file from your device',
+                      style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                    ),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                    activeColor: AppTheme.accentColor,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await _viewModel.deleteSong(song, deleteFile: deleteFile);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(deleteFile
+                              ? 'Song and file deleted'
+                              : 'Song removed from library'),
+                          backgroundColor: AppTheme.accentColor,
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                ),
+              ],
+            );
+          },
         );
       },
     );

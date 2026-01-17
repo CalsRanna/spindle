@@ -5,6 +5,7 @@ import 'package:spindle/page/desktop/library/library_view_model.dart';
 import 'package:spindle/page/desktop/player/player_view_model.dart';
 import 'package:spindle/page/desktop/queue/queue_view_model.dart';
 import 'package:spindle/page/desktop/search/search_view_model.dart';
+import 'package:spindle/page/desktop/wifi_transfer/wifi_transfer_view_model.dart';
 
 class DI {
   static Future<void> ensureInitialized() async {
@@ -14,6 +15,7 @@ class DI {
     getIt.registerLazySingleton<LibraryViewModel>(() => LibraryViewModel());
     getIt.registerLazySingleton<PlayerViewModel>(() => PlayerViewModel());
     getIt.registerLazySingleton<FavoritesViewModel>(() => FavoritesViewModel());
+    getIt.registerLazySingleton<WiFiTransferViewModel>(() => WiFiTransferViewModel());
     getIt.registerFactory<ImportViewModel>(() => ImportViewModel());
     getIt.registerFactory<SearchViewModel>(() => SearchViewModel());
     getIt.registerFactory<QueueViewModel>(() => QueueViewModel());

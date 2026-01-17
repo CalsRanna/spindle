@@ -111,6 +111,7 @@ class FileService {
   Future<int> importFiles(List<String> filePaths) async {
     int importedCount = 0;
     final isIOS = Platform.isIOS;
+    final musicDir = await _getMusicDirectory();
 
     for (final filePath in filePaths) {
       _logger.i('Importing file: $filePath');
@@ -124,8 +125,8 @@ class FileService {
       try {
         String permanentPath = filePath;
 
-        // On iOS, copy file to permanent storage
-        if (isIOS) {
+        // On iOS, copy file to permanent storage (unless already in Music directory)
+        if (isIOS && !filePath.startsWith(musicDir.path)) {
           final copiedPath = await _copyToMusicDirectory(filePath);
           if (copiedPath == null) {
             _logger.w('Failed to copy file: $filePath');
@@ -251,6 +252,9 @@ class FileService {
   }
 
   Future<int> importFolder(String folderPath) async {
+    // Cleanup invalid songs before scanning
+    await _songRepository.cleanupInvalidSongs();
+
     // Add folder to database if not exists
     if (!await _folderRepository.exists(folderPath)) {
       await _folderRepository.insert(FolderPath(

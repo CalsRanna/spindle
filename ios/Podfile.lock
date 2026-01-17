@@ -46,6 +46,8 @@ PODS:
   - just_audio (0.0.1):
     - Flutter
     - FlutterMacOS
+  - metadata_god (0.0.1):
+    - Flutter
   - permission_handler_apple (9.3.0):
     - Flutter
   - SDWebImage (5.21.5):
@@ -67,6 +69,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_media_metadata (from `.symlinks/plugins/flutter_media_metadata/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/darwin`)
+  - metadata_god (from `.symlinks/plugins/metadata_god/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
@@ -93,6 +96,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_media_metadata/ios"
   just_audio:
     :path: ".symlinks/plugins/just_audio/darwin"
+  metadata_god:
+    :path: ".symlinks/plugins/metadata_god/ios"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   shared_preferences_foundation:
@@ -110,6 +115,7 @@ SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_media_metadata: ad56576cf9c9842a1b23ca68195aeb816918de9b
   just_audio: 4e391f57b79cad2b0674030a00453ca5ce817eed
+  metadata_god: 018b59c2f3617569928550dcbd17481591557c1d
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb

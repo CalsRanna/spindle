@@ -5,9 +5,11 @@ import 'package:signals/signals_flutter.dart';
 import 'package:spindle/page/desktop/player/player_view_model.dart';
 import 'package:spindle/router/app_router.gr.dart';
 import 'package:spindle/service/audio_service.dart';
+import 'package:spindle/service/lyrics_service.dart';
 import 'package:spindle/util/app_theme.dart';
 import 'package:spindle/widget/album_cover.dart';
 import 'package:spindle/widget/blur_background.dart';
+import 'package:spindle/widget/lyrics_view.dart';
 
 @RoutePage()
 class MobilePlayerPage extends StatefulWidget {
@@ -19,11 +21,26 @@ class MobilePlayerPage extends StatefulWidget {
 
 class _MobilePlayerPageState extends State<MobilePlayerPage> {
   late final PlayerViewModel _viewModel;
+  final _lyricsService = LyricsService.instance;
+  final _pageController = PageController();
+  int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
     _viewModel = GetIt.instance.get<PlayerViewModel>();
+
+    // Load lyrics when song changes
+    effect(() {
+      final song = _viewModel.currentSong.value;
+      _lyricsService.loadLyrics(song?.filePath);
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -86,17 +103,57 @@ class _MobilePlayerPageState extends State<MobilePlayerPage> {
                   ),
                 ),
 
-                // Album art
+                // Album art / Lyrics PageView
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: Center(
-                      child: AlbumCover(
-                        imagePath: currentSong.albumArtPath,
-                        size: MediaQuery.of(context).size.width - 64,
-                        borderRadius: 16,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: PageView(
+                          controller: _pageController,
+                          onPageChanged: (index) {
+                            setState(() => _currentPage = index);
+                          },
+                          children: [
+                            // Page 0: Album Cover
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 32),
+                              child: Center(
+                                child: AlbumCover(
+                                  imagePath: currentSong.albumArtPath,
+                                  size: MediaQuery.of(context).size.width - 64,
+                                  borderRadius: 16,
+                                ),
+                              ),
+                            ),
+                            // Page 1: Lyrics
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: LyricsView(position: position),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+                      // Page indicator
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12, bottom: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(2, (index) {
+                            return Container(
+                              width: 8,
+                              height: 8,
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: _currentPage == index
+                                    ? AppTheme.accentColor
+                                    : AppTheme.textSecondary.withValues(alpha: 0.3),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 

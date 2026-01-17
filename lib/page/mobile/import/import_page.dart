@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:spindle/page/desktop/import/import_view_model.dart';
+import 'package:spindle/router/app_router.gr.dart';
 import 'package:spindle/util/app_theme.dart';
 
 @RoutePage()
@@ -114,6 +115,18 @@ class _MobileImportPageState extends State<MobileImportPage> {
                 onTap: _viewModel.pickAndAddFolder,
               ),
             ],
+
+            // WiFi Transfer option (available on all platforms)
+            const SizedBox(height: 16),
+            _buildCard(
+              icon: Icons.wifi,
+              iconColor: Colors.blue,
+              title: 'WiFi Transfer',
+              subtitle: 'Receive files from your computer',
+              trailing: const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
+              onTap: () => context.router.push(const MobileWifiTransferRoute()),
+            ),
+
             const SizedBox(height: 32),
             if (isScanning) ...[
               const LinearProgressIndicator(
