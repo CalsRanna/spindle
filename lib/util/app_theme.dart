@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Colors
@@ -39,9 +40,7 @@ class AppTheme {
           borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
       ),
-      iconTheme: const IconThemeData(
-        color: textPrimary,
-      ),
+      iconTheme: const IconThemeData(color: textPrimary),
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
           color: textPrimary,
@@ -63,18 +62,9 @@ class AppTheme {
           fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
-        bodyLarge: TextStyle(
-          color: textPrimary,
-          fontSize: 16,
-        ),
-        bodyMedium: TextStyle(
-          color: textSecondary,
-          fontSize: 14,
-        ),
-        bodySmall: TextStyle(
-          color: textSecondary,
-          fontSize: 12,
-        ),
+        bodyLarge: TextStyle(color: textPrimary, fontSize: 16),
+        bodyMedium: TextStyle(color: textSecondary, fontSize: 14),
+        bodySmall: TextStyle(color: textSecondary, fontSize: 12),
       ),
       sliderTheme: SliderThemeData(
         activeTrackColor: accentColor,
@@ -95,10 +85,7 @@ class AppTheme {
         iconColor: textPrimary,
         textColor: textPrimary,
       ),
-      dividerTheme: const DividerThemeData(
-        color: dividerColor,
-        thickness: 1,
-      ),
+      dividerTheme: const DividerThemeData(color: dividerColor, thickness: 1),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: accentColor,
@@ -127,6 +114,7 @@ class AppTheme {
         ),
         hintStyle: const TextStyle(color: textSecondary),
       ),
+      fontFamily: GoogleFonts.sono().fontFamily,
       useMaterial3: true,
     );
   }
