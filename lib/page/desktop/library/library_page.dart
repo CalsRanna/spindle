@@ -341,15 +341,16 @@ class _RecentlyPlayedCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            Text(
-              song.displayArtist,
-              style: const TextStyle(
-                color: AppTheme.textSecondary,
-                fontSize: 11,
+            if (song.artist != null)
+              Text(
+                song.artist!,
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 11,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
           ],
         ),
       ),

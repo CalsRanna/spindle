@@ -138,13 +138,14 @@ class _DesktopLyricsEditorPageState extends State<DesktopLyricsEditorPage> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        Text(
-                          widget.song.displayArtist,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: AppTheme.textSecondary,
+                        if (widget.song.artist != null)
+                          Text(
+                            widget.song.artist!,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppTheme.textSecondary,
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),

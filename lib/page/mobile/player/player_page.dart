@@ -219,16 +219,18 @@ class _MobilePlayerPageState extends State<MobilePlayerPage> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  currentSong.displayArtist,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: AppTheme.textSecondary,
+                                if (currentSong.artist != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    currentSong.artist!,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: AppTheme.textSecondary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                                ],
                               ],
                             ),
                           ),

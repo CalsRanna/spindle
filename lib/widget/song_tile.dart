@@ -35,15 +35,19 @@ class SongTile extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Text(
-        song.displayArtist,
-        style: TextStyle(
-          color: isPlaying ? AppTheme.accentColor.withValues(alpha: 0.7) : AppTheme.textSecondary,
-          fontSize: 13,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
+      subtitle: song.artist != null
+          ? Text(
+              song.artist!,
+              style: TextStyle(
+                color: isPlaying
+                    ? AppTheme.accentColor.withValues(alpha: 0.7)
+                    : AppTheme.textSecondary,
+                fontSize: 13,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            )
+          : null,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -108,17 +108,19 @@ class _MobileQueuePageState extends State<MobileQueuePage> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        subtitle: Text(
-                          song.displayArtist,
-                          style: TextStyle(
-                            color: isCurrent
-                                ? AppTheme.accentColor.withValues(alpha: 0.7)
-                                : AppTheme.textSecondary,
-                            fontSize: 13,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        subtitle: song.artist != null
+                            ? Text(
+                                song.artist!,
+                                style: TextStyle(
+                                  color: isCurrent
+                                      ? AppTheme.accentColor.withValues(alpha: 0.7)
+                                      : AppTheme.textSecondary,
+                                  fontSize: 13,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              )
+                            : null,
                         trailing: isUpNext
                             ? IconButton(
                                 icon: const Icon(

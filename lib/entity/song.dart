@@ -122,6 +122,6 @@ class Song {
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
-  String get displayArtist => artist ?? 'Unknown Artist';
+  String get displayArtist => artist ?? '';
   String get displayAlbum => album ?? 'Unknown Album';
 }

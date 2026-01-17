@@ -93,8 +93,8 @@ class AudioService {
     _audioHandler!.setMediaItem(audio.MediaItem(
       id: song.id?.toString() ?? song.filePath,
       title: song.title,
-      artist: song.artist ?? 'Unknown Artist',
-      album: song.album ?? 'Unknown Album',
+      artist: song.artist,
+      album: song.album,
       duration: duration,
       artUri: song.albumArtPath != null ? Uri.file(song.albumArtPath!) : null,
     ));
