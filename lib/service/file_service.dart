@@ -74,6 +74,8 @@ class FileService {
   }
 
   /// Copy file to app's permanent storage (for iOS)
+  /// If a file with the same name already exists in the Music directory,
+  /// return that path instead of creating a duplicate.
   Future<String?> _copyToMusicDirectory(String sourcePath) async {
     try {
       final sourceFile = File(sourcePath);
@@ -84,17 +86,13 @@ class FileService {
 
       final musicDir = await _getMusicDirectory();
       final fileName = p.basename(sourcePath);
+      final destPath = '${musicDir.path}/$fileName';
+      final destFile = File(destPath);
 
-      // Generate unique filename if file already exists
-      var destPath = '${musicDir.path}/$fileName';
-      var destFile = File(destPath);
-      int counter = 1;
-      while (await destFile.exists()) {
-        final nameWithoutExt = p.basenameWithoutExtension(fileName);
-        final ext = p.extension(fileName);
-        destPath = '${musicDir.path}/${nameWithoutExt}_$counter$ext';
-        destFile = File(destPath);
-        counter++;
+      // If file already exists in Music directory, use it directly
+      if (await destFile.exists()) {
+        _logger.i('File already exists in Music directory: $destPath');
+        return destPath;
       }
 
       _logger.i('Copying file to: $destPath');
