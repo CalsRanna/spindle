@@ -34,6 +34,22 @@ class AudioService {
   Duration get position => _player.position;
   Duration get duration => _player.duration ?? Duration.zero;
 
+  /// 设置系统媒体控制的回调
+  void setMediaControlCallbacks({
+    required Future<void> Function() onPlay,
+    required Future<void> Function() onPause,
+    required Future<void> Function() onStop,
+    required Future<void> Function() onSkipToNext,
+    required Future<void> Function() onSkipToPrevious,
+  }) {
+    if (_audioHandler == null) return;
+    _audioHandler!.onPlay = onPlay;
+    _audioHandler!.onPause = onPause;
+    _audioHandler!.onStop = onStop;
+    _audioHandler!.onSkipToNext = onSkipToNext;
+    _audioHandler!.onSkipToPrevious = onSkipToPrevious;
+  }
+
   /// Initialize audio session for background playback
   Future<void> init() async {
     if (_initialized) return;
@@ -181,11 +197,11 @@ class _SpindleAudioHandler extends audio.BaseAudioHandler
   final AudioService _service;
 
   // 回调函数，由 PlayerViewModel 设置
-  void Function()? onPlay;
-  void Function()? onPause;
-  void Function()? onStop;
-  void Function()? onSkipToNext;
-  void Function()? onSkipToPrevious;
+  Future<void> Function()? onPlay;
+  Future<void> Function()? onPause;
+  Future<void> Function()? onStop;
+  Future<void> Function()? onSkipToNext;
+  Future<void> Function()? onSkipToPrevious;
 
   _SpindleAudioHandler(this._service);
 
@@ -199,17 +215,17 @@ class _SpindleAudioHandler extends audio.BaseAudioHandler
 
   @override
   Future<void> play() async {
-    onPlay?.call();
+    await onPlay?.call();
   }
 
   @override
   Future<void> pause() async {
-    onPause?.call();
+    await onPause?.call();
   }
 
   @override
   Future<void> stop() async {
-    onStop?.call();
+    await onStop?.call();
   }
 
   @override
@@ -219,11 +235,11 @@ class _SpindleAudioHandler extends audio.BaseAudioHandler
 
   @override
   Future<void> skipToNext() async {
-    onSkipToNext?.call();
+    await onSkipToNext?.call();
   }
 
   @override
   Future<void> skipToPrevious() async {
-    onSkipToPrevious?.call();
+    await onSkipToPrevious?.call();
   }
 }

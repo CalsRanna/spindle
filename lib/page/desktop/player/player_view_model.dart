@@ -28,6 +28,17 @@ class PlayerViewModel {
 
   PlayerViewModel() {
     _initListeners();
+    _setupMediaControlCallbacks();
+  }
+
+  void _setupMediaControlCallbacks() {
+    _audioService.setMediaControlCallbacks(
+      onPlay: play,
+      onPause: pause,
+      onStop: stop,
+      onSkipToNext: next,
+      onSkipToPrevious: previous,
+    );
   }
 
   void _initListeners() {
