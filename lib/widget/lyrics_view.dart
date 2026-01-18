@@ -19,6 +19,7 @@ class LyricsView extends StatefulWidget {
 class _LyricsViewState extends State<LyricsView> {
   final _lyricsService = LyricsService.instance;
   final _scrollController = ScrollController();
+  final Map<int, GlobalKey> _itemKeys = {};
   int _lastHighlightedIndex = -1;
 
   @override
@@ -35,6 +36,10 @@ class _LyricsViewState extends State<LyricsView> {
     }
   }
 
+  GlobalKey _getKeyForIndex(int index) {
+    return _itemKeys.putIfAbsent(index, () => GlobalKey());
+  }
+
   void _scrollToCurrentLine() {
     final lyrics = _lyricsService.currentLyrics.value;
     if (lyrics.isEmpty || !lyrics.hasTiming) return;
@@ -43,19 +48,16 @@ class _LyricsViewState extends State<LyricsView> {
     if (currentIndex == _lastHighlightedIndex) return;
     _lastHighlightedIndex = currentIndex;
 
-    if (currentIndex >= 0 && _scrollController.hasClients) {
-      const itemHeight = 56.0;
-      const topPadding = 100.0;
-      final viewportHeight = _scrollController.position.viewportDimension;
-      // Calculate position to center the current line in viewport
-      final itemCenterPosition =
-          topPadding + (currentIndex * itemHeight) + (itemHeight / 2);
-      final targetOffset = itemCenterPosition - (viewportHeight / 2);
-      _scrollController.animateTo(
-        targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-      );
+    if (currentIndex >= 0) {
+      final key = _itemKeys[currentIndex];
+      if (key?.currentContext != null) {
+        Scrollable.ensureVisible(
+          key!.currentContext!,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          alignment: 0.5, // Center the item in viewport
+        );
+      }
     }
   }
 
@@ -86,6 +88,7 @@ class _LyricsViewState extends State<LyricsView> {
           final isPast = index < currentIndex;
 
           return Padding(
+            key: _getKeyForIndex(index),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             child: AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),
