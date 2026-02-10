@@ -10,73 +10,15 @@ class DesktopSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('SETTINGS'),
-      ),
+      appBar: AppBar(title: const Text('SETTINGS')),
       body: ListView(
         children: [
-          _buildSectionHeader('PLAYBACK'),
-          _buildSettingsTile(
-            icon: Icons.high_quality,
-            title: 'Audio Quality',
-            subtitle: 'High (320kbps)',
-            onTap: () {},
-          ),
-          _buildSettingsTile(
-            icon: Icons.equalizer,
-            title: 'Equalizer',
-            subtitle: 'Off',
-            onTap: () {},
-          ),
-          _buildSettingsTile(
-            icon: Icons.music_note,
-            title: 'Gapless Playback',
-            trailing: Switch(
-              value: true,
-              onChanged: (value) {},
-              activeTrackColor: AppTheme.accentColor,
-            ),
-          ),
-
           _buildSectionHeader('LIBRARY'),
           _buildSettingsTile(
             icon: Icons.folder,
             title: 'Scan Folders',
             subtitle: 'Manage music folders',
             onTap: () => context.router.push(const DesktopImportRoute()),
-          ),
-          _buildSettingsTile(
-            icon: Icons.image,
-            title: 'Artworks & Metadata',
-            subtitle: 'Download missing artwork',
-            onTap: () {},
-          ),
-
-          _buildSectionHeader('APPEARANCE'),
-          _buildSettingsTile(
-            icon: Icons.dark_mode,
-            title: 'Theme',
-            subtitle: 'Dark',
-            onTap: () {},
-          ),
-          _buildSettingsTile(
-            icon: Icons.apps,
-            title: 'App Icon',
-            subtitle: 'Default',
-            onTap: () {},
-          ),
-
-          _buildSectionHeader('INFO'),
-          _buildSettingsTile(
-            icon: Icons.info_outline,
-            title: 'About',
-            subtitle: 'Version 1.0.0',
-            onTap: () {},
-          ),
-          _buildSettingsTile(
-            icon: Icons.help_outline,
-            title: 'Help & Support',
-            onTap: () {},
           ),
 
           const SizedBox(height: 80),
@@ -119,7 +61,9 @@ class DesktopSettingsPage extends StatelessWidget {
               ),
             )
           : null,
-      trailing: trailing ?? const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
+      trailing:
+          trailing ??
+          const Icon(Icons.chevron_right, color: AppTheme.textSecondary),
       onTap: onTap,
     );
   }

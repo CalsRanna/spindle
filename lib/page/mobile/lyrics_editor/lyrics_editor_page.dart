@@ -395,30 +395,27 @@ class _MobileLyricsEditorPageState extends State<MobileLyricsEditorPage> {
 
             const SizedBox(width: 12),
 
-            // Lyrics text and timestamp
+            // Lyrics text with inline timestamp
+            if (hasTimestamp) ...[
+              Text(
+                _formatTimestamp(line.timestamp!),
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                  color: AppTheme.accentColor.withValues(alpha: 0.8),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    line.text,
-                    style: TextStyle(
-                      fontSize: 16,
-                      height: 1.4,
-                      color: isCurrentLine ? AppTheme.textPrimary : AppTheme.textPrimary.withValues(alpha: 0.8),
-                      fontWeight: isCurrentLine ? FontWeight.w600 : FontWeight.normal,
-                    ),
-                  ),
-                  if (hasTimestamp)
-                    Text(
-                      _formatTimestamp(line.timestamp!),
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                        color: AppTheme.accentColor.withValues(alpha: 0.8),
-                      ),
-                    ),
-                ],
+              child: Text(
+                line.text,
+                style: TextStyle(
+                  fontSize: 16,
+                  height: 1.4,
+                  color: isCurrentLine ? AppTheme.textPrimary : AppTheme.textPrimary.withValues(alpha: 0.8),
+                  fontWeight: isCurrentLine ? FontWeight.w600 : FontWeight.normal,
+                ),
               ),
             ),
 
