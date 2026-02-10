@@ -8,6 +8,8 @@ import 'package:spindle/repository/folder_repository.dart';
 import 'package:spindle/service/file_service.dart';
 
 class ImportViewModel {
+  static void Function()? onSongsImported;
+
   final _fileService = FileService();
   final _folderRepository = FolderRepository();
 
@@ -71,6 +73,7 @@ class ImportViewModel {
         scanProgress.value = 'No new files imported';
       }
 
+      if (result.audioCount > 0) onSongsImported?.call();
       return result;
     } catch (e) {
       scanProgress.value = 'Error: $e';
@@ -90,6 +93,7 @@ class ImportViewModel {
       final count = await _fileService.scanDocumentsDirectory();
       if (count > 0) {
         scanProgress.value = 'Imported $count songs from Documents';
+        onSongsImported?.call();
       } else {
         scanProgress.value = 'No new songs in Documents folder';
       }
@@ -215,6 +219,7 @@ class ImportViewModel {
       final count = await _fileService.importFolder(path);
       if (count > 0) {
         scanProgress.value = 'Imported $count songs';
+        onSongsImported?.call();
       } else {
         scanProgress.value = 'No audio files found in folder';
       }
@@ -236,6 +241,7 @@ class ImportViewModel {
       await _fileService.scanAllFolders();
       await loadFolders();
       scanProgress.value = 'Scan complete';
+      onSongsImported?.call();
     } catch (e) {
       scanProgress.value = 'Error: $e';
     } finally {

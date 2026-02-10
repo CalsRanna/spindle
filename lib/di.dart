@@ -29,5 +29,9 @@ class DI {
     FavoritesViewModel.onFavoriteChanged = () {
       getIt.get<LibraryViewModel>().loadSongs();
     };
+
+    ImportViewModel.onSongsImported = () {
+      getIt.get<LibraryViewModel>().loadSongs();
+    };
   }
 }
